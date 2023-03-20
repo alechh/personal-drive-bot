@@ -1,7 +1,8 @@
 import psycopg2
+from decouple import config
 
 def ls(message):
-    conn = psycopg2.connect(host="localhost", port=5432, database="postgres", user="alechh", password="123")
+    conn = psycopg2.connect(host=config("db_host"), port=config("db_port"), database=config("db_name"), user=config("db_user"), password=config("db_pass"))
     cur = conn.cursor()
 
     cur.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
@@ -29,7 +30,7 @@ def ls(message):
 
 
 def cd(message):
-    conn = psycopg2.connect(host="localhost", port=5432, database="postgres", user="alechh", password="123")
+    conn = psycopg2.connect(host=config("db_host"), port=config("db_port"), database=config("db_name"), user=config("db_user"), password=config("db_pass"))
     cur = conn.cursor()
 
     new_folder_name = message.text.split(' ')[1]
@@ -71,7 +72,7 @@ def cd(message):
         return -2
     
 def mkdir(message):
-    conn = psycopg2.connect(host="localhost", port=5432, database="postgres", user="alechh", password="123")
+    conn = psycopg2.connect(host=config("db_host"), port=config("db_port"), database=config("db_name"), user=config("db_user"), password=config("db_pass"))
     cur = conn.cursor()
 
     new_folder_name = message.text.split(' ')[1]
@@ -86,7 +87,7 @@ def mkdir(message):
 
 
 def pwd(message):
-    conn = psycopg2.connect(host="localhost", port=5432, database="postgres", user="alechh", password="123")
+    conn = psycopg2.connect(host=config("db_host"), port=config("db_port"), database=config("db_name"), user=config("db_user"), password=config("db_pass"))
     cur = conn.cursor()
 
     cur.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
@@ -109,7 +110,7 @@ def pwd(message):
     return "/" + current_directory_name
 
 def add_new_user(message):
-    conn = psycopg2.connect(host="localhost", port=5432, database="postgres", user="alechh", password="123")
+    conn = psycopg2.connect(host=config("db_host"), port=config("db_port"), database=config("db_name"), user=config("db_user"), password=config("db_pass"))
     cur = conn.cursor()
 
     # check if the user exists in table users
