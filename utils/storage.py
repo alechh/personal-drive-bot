@@ -38,7 +38,9 @@ def ls(message):
     files_answer = ''
 
     for file in files:
-        files_answer += file[2] + ' '
+        cur.execute("SELECT file_name FROM files WHERE file_id = %s", (file[0],))
+        file_name = cur.fetchall()[0][0]
+        files_answer += file_name + ' '
 
     conn.close()
 
