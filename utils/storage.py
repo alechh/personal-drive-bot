@@ -81,6 +81,12 @@ def pwd(message):
     
     current_directory_name = res_tuple[2]
 
+    while res_tuple[3] != None:
+        cur.execute("SELECT * FROM folders WHERE folder_id = %s", (res_tuple[3],))
+        res = cur.fetchall()
+        res_tuple = res[0]
+        current_directory_name = res_tuple[2] + '/' + current_directory_name
+
     conn.close()
 
     return current_directory_name
