@@ -1,11 +1,27 @@
 import psycopg2
 from decouple import config
 
+def check_user(message):
+    conn = psycopg2.connect(host=config("db_host"), port=config("db_port"), database=config("db_name"), user=config("db_user"), password=config("db_pass"))
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM users WHERE user_id = %s", (message.from_user.id,))
+
+    res = cur.fetchall()
+
+    conn.close()
+
+    if len(res) == 0:
+        return False
+    else:
+        return True
+
 def ls(message):
     conn = psycopg2.connect(host=config("db_host"), port=config("db_port"), database=config("db_name"), user=config("db_user"), password=config("db_pass"))
     cur = conn.cursor()
 
     cur.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
+
     current_directory = cur.fetchall()[0]
 
     cur.execute("SELECT * FROM folders WHERE parent_folder_id = %s", (current_directory))
