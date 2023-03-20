@@ -93,7 +93,7 @@ def pwd(message):
 
     conn.close()
 
-    return current_directory_name
+    return "/" + current_directory_name
 
 def add_new_user(message):
     conn = psycopg2.connect(host="localhost", port=5432, database="postgres", user="alechh", password="123")
