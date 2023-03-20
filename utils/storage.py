@@ -28,6 +28,10 @@ def cd(message):
         cur.execute("SELECT parent_folder_id FROM folders WHERE folder_id = %s", (current_directory))
         parent_folder = cur.fetchall()[0]
 
+        if parent_folder[0] == None:
+            conn.close()
+            return -3
+
         cur.execute("UPDATE user_directories SET current_directory = %s WHERE user_id = %s", (parent_folder, message.from_user.id))
         conn.commit()
         conn.close()

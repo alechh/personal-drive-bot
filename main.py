@@ -27,6 +27,8 @@ def handle_text(message):
             answer = 'Нет такой папки'
         elif res == -2:
             answer = 'Несколько папок с таким именем'
+        elif res == -3:
+            answer = 'Вы находитесь в корневой папке'
         else:
             answer = 'Перешел в папку'
     elif message.text == 'ls':
