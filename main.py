@@ -17,32 +17,44 @@ def handle_text(message):
     answer = ''
 
     if message.text == 'pwd':
-        answer = storage.pwd(message)
+        if storage.check_user(message):
+            answer = storage.pwd(message)
+        else:
+            answer = 'Вас нет в базе, пропишите /start'
     elif 'mkdir ' in message.text and len(message.text.split(' ')) == 2:
-        storage.mkdir(message)
-        answer = 'Создал папку'
+        if storage.check_user(message):
+            storage.mkdir(message)
+            answer = 'Создал папку'
+        else:
+            answer = 'Вас нет в базе, пропишите /start'
     elif 'cd ' in message.text and len(message.text.split(' ')) == 2:
-        res = storage.  cd(message)
-        if res == -1:
-            answer = 'Нет такой папки'
-        elif res == -2:
-            answer = 'Несколько папок с таким именем'
-        elif res == -3:
-            answer = 'Вы находитесь в корневой папке'
+        if storage.check_user(message):
+            res = storage.  cd(message)
+            if res == -1:
+                answer = 'Нет такой папки'
+            elif res == -2:
+                answer = 'Несколько папок с таким именем'
+            elif res == -3:
+                answer = 'Вы находитесь в корневой папке'
+            else:
+                answer = 'Перешел в папку'
         else:
-            answer = 'Перешел в папку'
+            answer = 'Вас нет в базе, пропишите /start'
     elif message.text == 'ls':
-        folders_res, files_res = storage.ls(message)
+        if storage.check_user(message):
+            folders_res, files_res = storage.ls(message)
+            if folders_res == '':
+                answer += 'Папок нет'
+            else:
+                answer += 'Папки: ' + folders_res
 
-        if folders_res == '':
-            answer += 'Папок нет'
+            if files_res == '':
+                answer += '\nФайлов нет'
+            else:
+                answer += '\nФайлы: ' + files_res
         else:
-            answer += 'Папки: ' + folders_res
+            answer = 'Вас нет в базе, пропишите /start'
 
-        if files_res == '':
-            answer += '\nФайлов нет'
-        else:
-            answer += '\nФайлы: ' + files_res
 
     bot.send_message(message.chat.id, answer)
 
