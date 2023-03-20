@@ -65,10 +65,13 @@ def handle_document(message):
     file_url = 'https://api.telegram.org/file/bot{}/{}'.format(bot.token, file_info.file_path)
     file_name = message.document.file_name
 
-    # выводим информацию на экран
-    print('Получен файл:')
-    print('Ссылка: {}'.format(file_url))
-    print('Название файла: {}'.format(file_name))
+    if not storage.check_user(message):
+        bot.send_message(message.chat.id, 'Вас нет в базе, пропишите /start')
+        return
+
+    # save file to database
+    if storage.save_file(message, file_name, file_url) == 0:
+        bot.send_message(message.chat.id, 'Файл успешно сохранен')
 
 
 bot.polling(none_stop=True)

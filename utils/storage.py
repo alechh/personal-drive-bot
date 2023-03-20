@@ -143,3 +143,26 @@ def add_new_user(message):
     else:
         conn.close()
         return 0
+    
+def save_file(message, file_name, file_url):
+    conn = psycopg2.connect(host=config("db_host"), port=config("db_port"), database=config("db_name"), user=config("db_user"), password=config("db_pass"))
+    cur = conn.cursor()
+
+    cur.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
+    current_directory = cur.fetchall()[0]
+
+    cur.execute("SELECT * FROM folder_files WHERE folder_id = %s", (current_directory))
+    number_of_files = len(cur.fetchall())
+
+    cur.execute("INSERT INTO files (file_id, user_id, file_name, file_url) VALUES (%s, %s, %s, %s)", (number_of_files + 1, message.from_user.id, file_name, file_url))
+
+    cur.execute("SELECT file_id FROM files WHERE file_name = %s and file_url = %s", (file_name, file_url))
+
+    file_id = cur.fetchall()[0]
+
+    cur.execute("INSERT INTO folder_files (folder_id, file_id) VALUES (%s, %s)", (current_directory, file_id))
+
+    conn.commit()
+    conn.close()
+
+    return 0
