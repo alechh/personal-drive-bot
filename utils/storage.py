@@ -8,11 +8,24 @@ def ls(message):
     current_directory = cur.fetchall()[0]
 
     cur.execute("SELECT * FROM folders WHERE parent_folder_id = %s", (current_directory))
-    res = cur.fetchall()
+    folders = cur.fetchall()
+
+    folders_answer = ''
+
+    for folder in folders:
+        folders_answer += folder[2] + ' '
+
+    cur.execute("SELECT file_id FROM folder_files WHERE folder_id = %s", (current_directory))
+    files = cur.fetchall()
+
+    files_answer = ''
+
+    for file in files:
+        files_answer += file[2] + ' '
 
     conn.close()
 
-    return res
+    return folders_answer, files_answer
 
 
 def cd(message):

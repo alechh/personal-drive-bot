@@ -22,7 +22,7 @@ def handle_text(message):
         storage.mkdir(message)
         answer = 'Создал папку'
     elif 'cd ' in message.text and len(message.text.split(' ')) == 2:
-        res = storage.cd(message)
+        res = storage.  cd(message)
         if res == -1:
             answer = 'Нет такой папки'
         elif res == -2:
@@ -32,14 +32,17 @@ def handle_text(message):
         else:
             answer = 'Перешел в папку'
     elif message.text == 'ls':
-        res = storage.ls(message)
+        folders_res, files_res = storage.ls(message)
 
-        if (len(res) == 0):
-            answer = 'Папка пуста'
-            return 0
+        if folders_res == '':
+            answer += 'Папок нет'
+        else:
+            answer += 'Папки: ' + folders_res
 
-        for i in res:
-            answer += i[2] + ' '
+        if files_res == '':
+            answer += '\nФайлов нет'
+        else:
+            answer += '\nФайлы: ' + files_res
 
     bot.send_message(message.chat.id, answer)
 
