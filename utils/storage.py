@@ -77,7 +77,13 @@ def mkdir(message):
     res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
     current_directory = res[0][0]
 
-    folder_id = (str) (hash((str) (message.from_user.id) + new_folder_name + current_directory))
+    # Check if folder with the same name already exists
+    res = db.execute("SELECT * FROM folders WHERE folder_name = %s and parent_folder_id = %s", (new_folder_name, current_directory))
+    if len(res) != 0:
+        return -1
+
+    folder_id_str = str(message.from_user.id) + '_' + current_directory + '/' + new_folder_name
+    folder_id = (str) (hash(folder_id_str))
 
     db.execute("INSERT INTO folders (folder_id, user_id, folder_name, parent_folder_id) VALUES (%s, %s, %s, %s)", (folder_id, message.from_user.id, new_folder_name, current_directory))
 
