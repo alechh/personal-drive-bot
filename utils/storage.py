@@ -122,11 +122,21 @@ def add_new_user(message):
 def save_file(message, file_id, file_name, file_url):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
+    # Get current directory
     res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
     current_directory = res[0]
 
+    # Check if file with the same name already exists in the current directory
+    res = db.execute("SELECT * FROM folder_files WHERE folder_id = %s", (current_directory,))
+    for file in res:
+        res2 = db.execute("SELECT * FROM files WHERE file_id = %s", (file[1],))
+        if res2[0][2] == file_name:
+            return -1
+    
+    # Add file to table files
     db.execute("INSERT INTO files (file_id, user_id, file_name, file_url) VALUES (%s, %s, %s, %s)", (file_id, message.from_user.id, file_name, file_url))
 
+    # Add file to table folder_files
     db.execute("INSERT INTO folder_files (folder_id, file_id) VALUES (%s, %s)", (current_directory, file_id))
 
     return 0
