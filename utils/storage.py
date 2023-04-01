@@ -146,22 +146,33 @@ def rm_file(message):
 
     file_name = message.text.split(' ')[1]
 
+    # Get current directory
     res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
     current_directory = res[0]
 
-    files_in_current_dir = db.execute ("SELECT file_id FROM folder_files WHERE folder_id = %s", (current_directory,))
+    # Get all files in current directory
+    files_in_current_dir = db.execute("SELECT file_id FROM folder_files WHERE folder_id = %s", (current_directory,))
 
     res = db.execute("SELECT file_id FROM files WHERE file_name = %s AND user_id = %s", (file_name, message.from_user.id))
     if len(res) == 0:
         return -1
     
-    file_id = res[0]
+    found = False
+    curr_index = 0
+    
+    file_id = res[curr_index]
 
-    if file_id not in files_in_current_dir:
-        return -1
-
-    db.execute("DELETE FROM folder_files WHERE folder_id = %s and file_id = %s", (current_directory, file_id))
-    db.execute("DELETE FROM files WHERE file_id = %s AND user_id = %s", (file_id, message.from_user.id))
+    # Try to find file_id in files_in_current_dir
+    while file_id not in files_in_current_dir and curr_index < len(res):
+        curr_index += 1
+        file_id = res[curr_index]
+    else:
+        found = True
+    
+    # If found, delete file from table files and table folder_files
+    if found:
+        db.execute("DELETE FROM folder_files WHERE folder_id = %s and file_id = %s", (current_directory, file_id))
+        db.execute("DELETE FROM files WHERE file_id = %s AND user_id = %s", (file_id, message.from_user.id))
     return 0
 
 def rm_folder(message):
