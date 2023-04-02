@@ -8,10 +8,8 @@ class DB_Connector:
         self.password = password
         self.database = database
         self.connection = self.connect()
-        print("Connected to database on {}:{}".format(self.host, self.port))
     
     def __del__(self):
-        print("Closing connection to database")
         self.disconnect()
 
     def connect(self):
