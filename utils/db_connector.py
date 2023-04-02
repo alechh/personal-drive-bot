@@ -32,7 +32,8 @@ class DB_Connector:
             cur = self.connection.cursor()
             cur.execute(query, params)
             self.connection.commit()
-            return cur.fetchall()
+            if 'SELECT' in query:
+                return cur.fetchall()
         except:
-            print("Failed to execute query")
+            print("Failed to execute query: {}".format(query))
             return []
