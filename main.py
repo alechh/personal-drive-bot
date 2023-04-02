@@ -14,7 +14,7 @@ def handle_start(message):
 
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
-    answer = ''
+    answer = 'Что-то пошло не так...'
 
     if not storage.check_user(message):
         answer = 'Вас нет в базе, пропишите /start'
@@ -38,6 +38,10 @@ def handle_text(message):
             answer = 'Перешел в папку'
     elif message.text == 'ls':
         folders_res, files_res = storage.ls(message)
+
+        if folders_res != None or files_res != None:
+            answer = ''
+
         if folders_res == '':
             answer += 'Папок нет'
         else:
