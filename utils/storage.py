@@ -205,7 +205,7 @@ def rm_folder(message):
     res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
     current_directory = res[0]
 
-    # Check if folder with the same name already exists in the current directory
+    # Get folder_id of folder to delete
     res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, current_directory))
     if len(res) == 0:
         return -1
@@ -260,4 +260,43 @@ def get_file_id(message):
     if found:
         return file_id[0]
     
+    return 0
+
+def rm_folder_minus_r(message):
+    db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
+
+    folder_name = message.text.split(' ')[2]
+
+    # Get current directory
+    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
+    current_directory = res[0]
+
+    # Get folder_id of folder to delete
+    res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, current_directory))
+    if len(res) == 0:
+        return -1
+    
+    target_folder_id = res[0]
+
+    # Delete all subfolders from table folders
+    subfolders = db.execute("SELECT folder_id FROM folders WHERE parent_folder_id = %s", (target_folder_id,))
+
+    # Check if subfolder contains files, if so, return -2
+    for subfolder in subfolders:
+        res_files = db.execute("SELECT * FROM folder_files WHERE folder_id = %s", (subfolder[0],))
+        if len(res_files) != 0:
+            return -2
+    
+    # Subfolders do not contain files, delete them
+    for subfolder in subfolders:
+        db.execute("DELETE FROM folders WHERE folder_id = %s", (subfolder[0],))
+
+    # Delete all files in target folder
+    files = db.execute("SELECT file_id FROM folder_files WHERE folder_id = %s", (target_folder_id,))
+    for file in files:
+        db.execute("DELETE FROM files WHERE file_id = %s", (file[0],))
+
+    # Delete target folder from table folders
+    db.execute("DELETE FROM folders WHERE folder_id = %s", target_folder_id)
+
     return 0
