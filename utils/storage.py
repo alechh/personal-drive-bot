@@ -212,6 +212,16 @@ def rm_folder(message):
     
     folder_id = res[0]
 
+    # Check if folder contains files
+    res = db.execute("SELECT * FROM folder_files WHERE folder_id = %s", (folder_id,))
+    if len(res) != 0:
+        return -2
+    
+    # Check if folder contains other folders
+    res = db.execute("SELECT * FROM folders WHERE parent_folder_id = %s", (folder_id,))
+    if len(res) != 0:
+        return -2
+
     # Delete folder from table folders
     db.execute("DELETE FROM folders WHERE folder_id = %s", (folder_id))
 

@@ -54,8 +54,13 @@ def handle_text(message):
     elif 'rm ' in message.text and len(message.text.split(' ')) == 2:
         if storage.rm_file(message) != -1:
             answer = 'Удалил файл ' + message.text.split(' ')[1]
-        elif storage.rm_folder(message) != -1:
+            bot.send_message(message.chat.id, answer)
+            return
+        rm_folder_res = storage.rm_folder(message)
+        if rm_folder_res == 0:
             answer = 'Удалил папку ' + message.text.split(' ')[1]
+        elif rm_folder_res == -2:
+            answer = 'Папка не пуста, чтобы удалить её вместе с содержимым, пропишите rm -r'
         else:
             answer = 'Нет такого файла или папки для удаления'
     elif './' in message.text:
