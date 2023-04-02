@@ -43,7 +43,7 @@ def handle_text(message):
         folders_res, files_res = storage.ls(message)
 
         if folders_res != None or files_res != None:
-            answer = ''
+            answer = storage.pwd(message) + '\n\n'
 
         if folders_res == '':
             answer += 'Папок нет'
