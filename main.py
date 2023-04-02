@@ -32,8 +32,6 @@ def handle_text(message):
         res = storage.cd(message)
         if res == -1:
             answer = 'Нет такой папки'
-        elif res == -2:
-            answer = 'Несколько папок с таким именем'
         elif res == -3:
             answer = 'Вы находитесь в корневой папке'
         else:

@@ -4,32 +4,38 @@ from decouple import config
 def check_user(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
+    # Check if user is in database
     res = db.execute("SELECT * FROM users WHERE user_id = %s", (message.from_user.id,))
 
     if len(res) == 0:
         return False
-    else:
-        return True
+    
+    return True
 
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
+    # Get current directory
     res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-
     current_directory = res[0]
 
+    # Get all folders in current directory
     folders = db.execute("SELECT * FROM folders WHERE parent_folder_id = %s", (current_directory))
 
     folders_answer = ''
 
+    # Add all folders to answer
     for folder in folders:
         folders_answer += folder[2] + ' '
 
+    # Get all files in current directory
     files = db.execute("SELECT file_id FROM folder_files WHERE folder_id = %s", (current_directory))
 
     files_answer = ''
 
+    # Add all files to answer
     for file in files:
+        # Get file name by file id
         res = db.execute("SELECT file_name FROM files WHERE file_id = %s", (file[0],))
         file_name = res[0][0]
         files_answer += file_name + ' '
@@ -42,38 +48,45 @@ def cd(message):
 
     new_folder_name = message.text.split(' ')[1]
 
+    # Check if user wants to go to parent folder
     if (new_folder_name == '..'):
+        # Get current directory
         res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
         current_directory = res[0]
 
+        # Get parent folder
         res = db.execute("SELECT parent_folder_id FROM folders WHERE folder_id = %s", (current_directory))
         parent_folder = res[0]
 
+        # Check if parent folder exists
         if parent_folder[0] == None:
             return -3
 
+        # Update current directory
         db.execute("UPDATE user_directories SET current_directory = %s WHERE user_id = %s", (parent_folder, message.from_user.id))
         return 0
 
+    # Get current directory
     res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-
     current_directory = res[0]
 
+    # Check if folder with the same name exists
     res = db.execute("SELECT * FROM folders WHERE folder_name = %s and parent_folder_id = %s", (new_folder_name, current_directory))
 
     if len(res) == 0:
+        # Folder with the same name doesn't exist
         return -1
     elif len(res) == 1:
+        # Update current directory
         db.execute("UPDATE user_directories SET current_directory = %s WHERE user_id = %s", (res[0][0], message.from_user.id))
         return 0
-    else:
-        return -2
     
 def mkdir(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
     new_folder_name = message.text.split(' ')[1]
 
+    # Get current directory
     res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
     current_directory = res[0][0]
 
@@ -82,26 +95,33 @@ def mkdir(message):
     if len(res) != 0:
         return -1
 
+    # Create folder_id as hash of user_id + current_directory + new_folder_name
     folder_id_str = str(message.from_user.id) + '_' + current_directory + '/' + new_folder_name
     folder_id = (str) (hash(folder_id_str))
 
+    # Add new folder to database
     db.execute("INSERT INTO folders (folder_id, user_id, folder_name, parent_folder_id) VALUES (%s, %s, %s, %s)", (folder_id, message.from_user.id, new_folder_name, current_directory))
 
 
 def pwd(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
+    # Get current directory
     res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
     current_directory = res[0]
 
+    # Get folder_name of current directory
     res = db.execute("SELECT * FROM folders WHERE folder_id = %s", (current_directory))
     res_tuple = res[0]
-    
     current_directory_name = res_tuple[2]
 
+    # Get full folder path (res_tuple[3] -- parent_folder_id)
     while res_tuple[3] != None:
+        # Get folder_name of parent folder
         res = db.execute("SELECT * FROM folders WHERE folder_id = %s", (res_tuple[3],))
         res_tuple = res[0]
+
+        # Add parent folder name to current directory name
         current_directory_name = res_tuple[2] + '/' + current_directory_name
 
     return "/" + current_directory_name
@@ -109,10 +129,10 @@ def pwd(message):
 def add_new_user(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
-    # check if the user exists in table users
+    # Check if the user exists in table users
     res = db.execute("SELECT * FROM users WHERE user_id = %s", (message.from_user.id,))
 
-    # if not, add the user to the table
+    # If not, add the user to the table
     if len(res) == 0:
         db.execute("INSERT INTO users (user_id, username) VALUES (%s, %s)", (message.from_user.id, message.from_user.username))
         return 1
@@ -180,16 +200,18 @@ def rm_folder(message):
 
     folder_name = message.text.split(' ')[1]
 
+    # Get current directory
     res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
     current_directory = res[0]
 
+    # Check if folder with the same name already exists in the current directory
     res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, current_directory))
-    folder_id = ''
-    try:
-        folder_id = res[0]
-    except:
+    if len(res) == 0:
         return -1
+    
+    folder_id = res[0]
 
+    # Delete folder from table folders
     db.execute("DELETE FROM folders WHERE folder_id = %s", (folder_id))
 
     return 0
