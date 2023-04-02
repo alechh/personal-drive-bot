@@ -23,7 +23,7 @@ def handle_text(message):
         
     if message.text == 'pwd':
         answer = storage.pwd(message)
-        
+
     elif 'mkdir ' in message.text and len(message.text.split(' ')) == 2:
         if storage.mkdir(message) != -1:
             answer = 'Создал папку'
@@ -37,7 +37,7 @@ def handle_text(message):
         elif res == -3:
             answer = 'Вы находитесь в корневой папке'
         else:
-            answer = 'Перешел в папку'
+            answer = 'Перешел в папку ' + storage.pwd(message)
 
     elif message.text == 'ls':
         folders_res, files_res = storage.ls(message)
