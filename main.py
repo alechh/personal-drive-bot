@@ -84,6 +84,18 @@ def handle_text(message):
             else:
                 answer = 'Нет такого файла или папки для удаления'
 
+    elif 'mv ' in message.text and len(message.text.split(' ')) == 3:
+        mv_res = storage.mv(message)
+        
+        if mv_res == -3:
+            answer = 'Вы находитесь в корневой папке'
+        if mv_res == -2:
+            answer = 'Нет такой папки внутри текущей папки (пока перемещать можно только внутри текущей папки)'
+        elif mv_res == -1:
+            answer = 'Нет такого файла (пока перемещать можно только файлы)'
+        elif mv_res == 0:
+            answer = 'Переместил файл {} в папку {}'.format(message.text.split(' ')[1], message.text.split(' ')[2])
+
     elif './' in message.text:
         file_id = storage.get_file_id(message)
         if file_id != 0 and file_id != -1:

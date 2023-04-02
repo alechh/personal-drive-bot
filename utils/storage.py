@@ -300,3 +300,52 @@ def rm_folder_minus_r(message):
     db.execute("DELETE FROM folders WHERE folder_id = %s", target_folder_id)
 
     return 0
+
+def mv(message):
+    db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
+
+    file_name = message.text.split(' ')[1]
+    target_folder_name = message.text.split(' ')[2]
+
+    # Get current directory
+    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
+    current_directory = res[0]
+
+    # Get all files in current directory
+    files_in_current_dir = db.execute("SELECT file_id FROM folder_files WHERE folder_id = %s", (current_directory,))
+    files_in_current_dir = [file[0] for file in files_in_current_dir]
+
+    res = db.execute("SELECT file_id FROM files WHERE file_name = %s AND user_id = %s", (file_name, message.from_user.id))
+    if len(res) == 0:
+        return -1
+    
+    found = False
+    curr_index = 0
+
+    file_id = res[curr_index]
+
+    # Try to find file_id in files_in_current_dir
+    while file_id[0] not in files_in_current_dir and curr_index < len(res):
+        curr_index += 1
+        file_id = res[curr_index]
+    else:
+        if curr_index < len(res):
+            found = True
+    
+    if not found:
+        return -1
+
+    # If found, check if target folder exists
+    if target_folder_name == '..':
+        res = db.execute("SELECT parent_folder_id FROM folders WHERE folder_id = %s", (current_directory,))
+        if res[0][0] == None:
+            return -3
+    else:
+        res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s AND parent_folder_id = %s", (target_folder_name, current_directory))
+        if len(res) == 0:
+            return -2
+        
+    target_folder_id = res[0]
+    db.execute("INSERT INTO folder_files (folder_id, file_id) VALUES (%s, %s)", (target_folder_id, file_id))
+    db.execute("DELETE FROM folder_files WHERE folder_id = %s AND file_id = %s", (current_directory, file_id))
+    return 0
