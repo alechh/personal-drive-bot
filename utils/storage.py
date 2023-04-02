@@ -187,7 +187,8 @@ def rm_file(message):
         curr_index += 1
         file_id = res[curr_index]
     else:
-        found = True
+        if curr_index < len(res):
+            found = True
     
     # If found, delete file from table files and table folder_files
     if found:
@@ -214,4 +215,39 @@ def rm_folder(message):
     # Delete folder from table folders
     db.execute("DELETE FROM folders WHERE folder_id = %s", (folder_id))
 
+    return 0
+
+def get_file_id(message):
+    db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
+
+    file_name = message.text.split('/')[1]
+
+    # Get current directory
+    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
+    current_directory = res[0]
+
+    # Get all files in current directory
+    files_in_current_dir = db.execute("SELECT file_id FROM folder_files WHERE folder_id = %s", (current_directory,))
+
+    res = db.execute("SELECT file_id FROM files WHERE file_name = %s AND user_id = %s", (file_name, message.from_user.id))
+    if len(res) == 0:
+        return -1
+    
+    found = False
+    curr_index = 0
+
+    file_id = res[curr_index]
+
+    # Try to find file_id in files_in_current_dir
+    while file_id not in files_in_current_dir and curr_index < len(res):
+        curr_index += 1
+        file_id = res[curr_index]
+    else:
+        if curr_index < len(res):
+            found = True
+    
+    # If found, return file_url
+    if found:
+        return file_id[0]
+    
     return 0

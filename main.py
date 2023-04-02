@@ -58,15 +58,25 @@ def handle_text(message):
             answer = 'Удалил папку ' + message.text.split(' ')[1]
         else:
             answer = 'Нет такого файла или папки для удаления'
-
+    elif './' in message.text:
+        file_id = storage.get_file_id(message)
+        if file_id != 0 and file_id != -1:
+            bot.send_document(message.chat.id, file_id, reply_to_message_id=message.message_id)
+            return
+        else:
+            answer = 'Нет такого файла'
+        
     bot.send_message(message.chat.id, answer)
 
 @bot.message_handler(content_types=['document'])
 def handle_document(message):
-    # получаем информацию о файле
+    # Get file id, file name and file url
     file_info = bot.get_file(message.document.file_id)
     file_url = 'https://api.telegram.org/file/bot{}/{}'.format(bot.token, file_info.file_path)
+    
     file_name = message.document.file_name
+    file_name = file_name.replace(' ', '_')
+
     file_id = message.document.file_id
 
     if not storage.check_user(message):
