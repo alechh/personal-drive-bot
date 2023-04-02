@@ -16,45 +16,46 @@ def handle_start(message):
 def handle_text(message):
     answer = ''
 
+    if not storage.check_user(message):
+        answer = 'Вас нет в базе, пропишите /start'
+        bot.send_message(message.chat.id, answer)
+        return
+        
     if message.text == 'pwd':
-        if storage.check_user(message):
-            answer = storage.pwd(message)
-        else:
-            answer = 'Вас нет в базе, пропишите /start'
+        answer = storage.pwd(message)
     elif 'mkdir ' in message.text and len(message.text.split(' ')) == 2:
-        if storage.check_user(message):
-            storage.mkdir(message)
+        if storage.mkdir(message) != -1:
             answer = 'Создал папку'
         else:
-            answer = 'Вас нет в базе, пропишите /start'
+            answer = 'Папка с таким именем уже есть'
     elif 'cd ' in message.text and len(message.text.split(' ')) == 2:
-        if storage.check_user(message):
-            res = storage.  cd(message)
-            if res == -1:
-                answer = 'Нет такой папки'
-            elif res == -2:
-                answer = 'Несколько папок с таким именем'
-            elif res == -3:
-                answer = 'Вы находитесь в корневой папке'
-            else:
-                answer = 'Перешел в папку'
+        res = storage.cd(message)
+        if res == -1:
+            answer = 'Нет такой папки'
+        elif res == -2:
+            answer = 'Несколько папок с таким именем'
+        elif res == -3:
+            answer = 'Вы находитесь в корневой папке'
         else:
-            answer = 'Вас нет в базе, пропишите /start'
+            answer = 'Перешел в папку'
     elif message.text == 'ls':
-        if storage.check_user(message):
-            folders_res, files_res = storage.ls(message)
-            if folders_res == '':
-                answer += 'Папок нет'
-            else:
-                answer += 'Папки: ' + folders_res
-
-            if files_res == '':
-                answer += '\nФайлов нет'
-            else:
-                answer += '\nФайлы: ' + files_res
+        folders_res, files_res = storage.ls(message)
+        if folders_res == '':
+            answer += 'Папок нет'
         else:
-            answer = 'Вас нет в базе, пропишите /start'
+            answer += 'Папки: ' + folders_res
 
+        if files_res == '':
+            answer += '\nФайлов нет'
+        else:
+            answer += '\nФайлы: ' + files_res
+    elif 'rm ' in message.text and len(message.text.split(' ')) == 2:
+        if storage.rm_file(message) != -1:
+            answer = 'Удалил файл ' + message.text.split(' ')[1]
+        elif storage.rm_folder(message) != -1:
+            answer = 'Удалил папку ' + message.text.split(' ')[1]
+        else:
+            answer = 'Нет такого файла или папки для удаления'
 
     bot.send_message(message.chat.id, answer)
 
