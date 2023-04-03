@@ -35,5 +35,5 @@ class DB_Connector:
             if 'SELECT' in query:
                 return cur.fetchall()
         except:
-            print("Failed to execute query: {}".format(query))
-            return []
+            raise Exception("Failed to execute query: {}".format(query))
+
