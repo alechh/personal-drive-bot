@@ -95,6 +95,8 @@ def handle_text(message):
             answer = 'Нет такого файла (пока перемещать можно только файлы)'
         elif mv_res == 0:
             answer = 'Переместил файл {} в папку {}'.format(message.text.split(' ')[1], message.text.split(' ')[2])
+        elif mv_res == 1:
+            answer = 'Переместил папку {} в папку {}'.format(message.text.split(' ')[1], message.text.split(' ')[2])
 
     elif './' in message.text:
         file_id = storage.get_file_id(message)

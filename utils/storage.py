@@ -317,8 +317,27 @@ def mv(message):
 
     res = db.execute("SELECT file_id FROM files WHERE file_name = %s AND user_id = %s", (file_name, message.from_user.id))
     if len(res) == 0:
-        return -1
+        # File does not exist, lets check if it is a folder
+        res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s AND parent_folder_id = %s", (file_name, current_directory))
+        if len(res) == 0:
+            return -1
+        else:
+            target_folder_id = res[0]
+            # It is a folder, lets check if target folder exists
+            if target_folder_name == '..':
+                res = db.execute("SELECT parent_folder_id FROM folders WHERE folder_id = %s", (current_directory,))
+                if res[0][0] == None:
+                    return -3
+            else:
+                res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s AND parent_folder_id = %s", (target_folder_name, current_directory))
+                if len(res) == 0:
+                    return -2
+            # Target folder exists, lets move folder
+
+            db.execute("UPDATE folders SET parent_folder_id = %s WHERE folder_id = %s", (res[0], target_folder_id))
+            return 1
     
+    # File exists, lets check if it is in current directory
     found = False
     curr_index = 0
 
