@@ -14,7 +14,7 @@ def handle_start(message):
 
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
-    answer = 'Что-то пошло не так...'
+    answer = 'Неизвестная команда'
 
     if not storage.check_user(message):
         answer = 'Вас нет в базе, пропишите /start'
