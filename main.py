@@ -95,7 +95,7 @@ def handle_text(message):
         if mv_res == -2:
             answer = 'Нет такой папки внутри текущей папки (пока перемещать можно только внутри текущей папки)'
         elif mv_res == -1:
-            answer = 'Нет такого файла (пока перемещать можно только файлы)'
+            answer = 'Нет такого файла или папки'
         elif mv_res == 0:
             answer = 'Переместил файл {} в папку {}'.format(message.text.split(' ')[1], message.text.split(' ')[2])
         elif mv_res == 1:
