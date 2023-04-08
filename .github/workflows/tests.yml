@@ -23,12 +23,9 @@ jobs:
         docker build -t postgres-image . 
         docker run --rm --name postgres-container -p 5432:5432 -d postgres-image
         
-    - name: Install dependencies
+    - name: Install dependencies and run tests
       run: |
         python3 -m venv venv
         source venv/bin/activate
         pip install -r requirements.txt
-
-    - name: Run tests
-      run: |
         python3 -m pytest
