@@ -8,5 +8,5 @@ from decouple import config
 import pytest
 
 def test_db_connector():
-    db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
+    db = DB_Connector("localhost", 5432, "alechh", "123", "postgres")
     assert db.connect() != None
