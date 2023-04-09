@@ -10,4 +10,4 @@ ENV POSTGRES_DB ${db_name}
 COPY ./init.sql /docker-entrypoint-initdb.d/
 
 # открываем порт 5432 для подключений к базе данных
-EXPOSE ${db_port}
+EXPOSE 5432
