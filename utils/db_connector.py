@@ -19,7 +19,7 @@ class DB_Connector:
                                 password=self.password)
             return conn
         except:
-            print("Failed to connect to database on {}:{}".format(self.host, self.port))
+            raise Exception("Failed to connect to database on {}:{}".format(self.host, self.port))
 
     def disconnect(self):
         try:
