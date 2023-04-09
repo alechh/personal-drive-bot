@@ -19,7 +19,7 @@ class DB_Connector:
                                 password=self.password)
             return conn
         except:
-            print("Failed to connect to database on {}:{}".format(self.host, self.port))
+            raise Exception("Failed to connect to database on {}:{}".format(self.host, self.port))
 
     def disconnect(self):
         try:
@@ -35,5 +35,5 @@ class DB_Connector:
             if 'SELECT' in query:
                 return cur.fetchall()
         except:
-            print("Failed to execute query: {}".format(query))
-            return []
+            raise Exception("Failed to execute query: {}".format(query))
+

@@ -14,7 +14,7 @@ def handle_start(message):
 
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
-    answer = 'Что-то пошло не так...'
+    answer = 'Неизвестная команда'
 
     if not storage.check_user(message):
         answer = 'Вас нет в базе, пропишите /start'
@@ -25,10 +25,13 @@ def handle_text(message):
         answer = storage.pwd(message)
 
     elif 'mkdir ' in message.text and len(message.text.split(' ')) == 2:
-        if storage.mkdir(message) != -1:
-            answer = 'Создал папку'
-        else:
+        mkdir_res = storage.mkdir(message)
+        if mkdir_res == -1:
             answer = 'Папка с таким именем уже есть'
+        elif mkdir_res == -2:
+            answer = 'В текущей директории есть файл с таким именем'
+        else:
+            answer = 'Создал папку'
 
     elif 'cd ' in message.text and len(message.text.split(' ')) == 2:
         res = storage.cd(message)
@@ -92,9 +95,11 @@ def handle_text(message):
         if mv_res == -2:
             answer = 'Нет такой папки внутри текущей папки (пока перемещать можно только внутри текущей папки)'
         elif mv_res == -1:
-            answer = 'Нет такого файла (пока перемещать можно только файлы)'
+            answer = 'Нет такого файла или папки'
         elif mv_res == 0:
             answer = 'Переместил файл {} в папку {}'.format(message.text.split(' ')[1], message.text.split(' ')[2])
+        elif mv_res == 1:
+            answer = 'Переместил папку {} в папку {}'.format(message.text.split(' ')[1], message.text.split(' ')[2])
 
     elif './' in message.text:
         file_id = storage.get_file_id(message)
@@ -122,10 +127,13 @@ def handle_document(message):
         return
 
     # Save file to database
-    if storage.save_file(message, file_id, file_name, file_url) == 0:
-        bot.send_message(message.chat.id, 'Файл успешно сохранен')
-    else:
+    save_res = storage.save_file(message, file_id, file_name, file_url)
+    if save_res == -1:
         bot.send_message(message.chat.id, 'Такой файл уже есть')
+    elif save_res == -2:
+        bot.send_message(message.chat.id, 'В текущей директории есть папка с таким именем')
+    else:
+        bot.send_message(message.chat.id, 'Файл успешно сохранен')
 
 
 bot.polling(none_stop=True)
