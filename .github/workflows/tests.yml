@@ -21,7 +21,7 @@ jobs:
     - name: Pull and run Docker image
       run: |
         docker build -t postgres-image ./database-schema 
-        docker run --rm --name postgres-container -p 5432:5432 -d postgres-image
+        docker run --rm --name postgres-container -e POSTGRES_USER=alechh -e PASSWORD=123 -e POSTGRES_DB=postgres -p 5432:5432 -d postgres-image
         
     - name: Install dependencies and run tests
       run: |
