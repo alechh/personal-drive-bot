@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 database-schema/db-data/
+db-data
 *DS_Store
 
 # C extensions
