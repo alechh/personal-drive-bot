@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    depends_on:
+      - db
+    environment:
+      db_host: ${db_host}
+      db_port: ${db_port}
+      db_name: ${db_name}
+      db_user: ${db_user}
+      db_pass: ${db_pass}
+      token: ${token}
+
+  db:
+    build: ./database-schema
+    ports:
+      - 5432:5432
+
