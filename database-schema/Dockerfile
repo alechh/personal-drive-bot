@@ -7,7 +7,7 @@ ENV POSTGRES_PASSWORD 123
 ENV POSTGRES_DB postgres
 
 # копируем файл инициализации базы данных в образ
-COPY database-schema/init.sql /docker-entrypoint-initdb.d/
+COPY ./init.sql /docker-entrypoint-initdb.d/
 
 # открываем порт 5432 для подключений к базе данных
 EXPOSE 5432
