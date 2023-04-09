@@ -1,3 +1,5 @@
+[![CI/CD Pipeline](https://github.com/alechh/personal-drive-bot/actions/workflows/tests.yml/badge.svg?branch=ci%2Fcd)](https://github.com/alechh/personal-drive-bot/actions/workflows/tests.yml)
+
 # personal-drive-bot
 Телеграм бот для организации файлового хранилища внутри мессенджера Телеграм.
 
