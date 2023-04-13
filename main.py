@@ -13,6 +13,23 @@ def handle_start(message):
     elif res == 1:
          bot.send_message(message.chat.id, 'Привет, добавил тебя в базу')  
 
+@bot.message_handler(commands=['help'])
+def help(message):
+    answer = """
+/start - Старт бота \n\
+/help - Список команд \n\
+/backup - Создать бэкап \n\
+/restore - Восстановиться из бэкапа \n\n\
+pwd - Показать текущую директорию \n\
+ls - Показать содержимое текущей директории \n\
+cd dir - Перейти в директорию \n\
+mkdir dir - Создать директорию \n\
+rm file_or_dir- Удалить файл \n\
+./file - Получить файл"""
+    
+    bot.send_message(message.chat.id, answer)
+        
+
 @bot.message_handler(commands=['backup'])
 def handle_backup(message):
     # Create folder for backups if it doesn't exist
