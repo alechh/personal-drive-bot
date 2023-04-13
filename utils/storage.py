@@ -2,6 +2,8 @@ from utils.db_connector import DB_Connector
 from decouple import config
 import tempfile
 import shutil
+import zipfile
+import os
 
 def check_user(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
@@ -394,8 +396,43 @@ def create_backup():
     
     for table in tables_to_backup:
         with tempfile.NamedTemporaryFile(mode='wb', delete=False, dir=backup_dir, prefix=f'{table}_', suffix='.csv') as backup_file:
-            db.make_backup(f"COPY {table} TO STDOUT WITH (FORMAT csv, HEADER true, DELIMITER ',', QUOTE '\"', ESCAPE '\\')", backup_file)
+            db.make_backup(f"COPY {table} TO STDOUT WITH (FORMAT csv, HEADER true, DELIMITER ',', QUOTE '\"', ESCAPE '\\', NULL 'null')", backup_file)
 
-    # backup_archive = shutil.make_archive(os.path.join(backup_dir, 'backup'), 'zip', root_dir=backup_dir)
         backup_archive = shutil.make_archive(backup_dir, 'zip', root_dir=backup_dir)
     return backup_archive
+
+def restore_backup(backup_path, user_id):
+    db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
+
+    # Extract backup to temporary directory
+    with tempfile.TemporaryDirectory(dir='./backup') as temp_dir:
+        with zipfile.ZipFile(backup_path, 'r') as backup_zip:
+            backup_zip.extractall(temp_dir)
+
+        # temp_dir += '/backup'
+
+        # Retrieve all backup files
+        backup_files = [f for f in os.listdir(temp_dir) if f.endswith('.csv')]
+
+        # Make folder_files last (because it depends on folders and files)
+        backup_files = sorted(backup_files, key=lambda x: x.split('_')[0] == 'folder')
+
+        # Restore data from backup files
+        for backup_file in backup_files:
+            table_name = os.path.splitext(backup_file)[0].split('_')[0]
+
+            # Dirty hack to fix folder_files table name
+            if table_name == 'folder':
+                table_name = 'folder_files'
+
+            backup_file_path = os.path.join(temp_dir, backup_file)
+
+            # Clean table before restoring data
+            db.execute(f"TRUNCATE {table_name} RESTART IDENTITY CASCADE")
+
+            # Restore data from backup file
+            with open(backup_file_path, 'r') as f:
+                db.restore_backup(f"COPY {table_name} FROM STDIN WITH (FORMAT csv, HEADER true, DELIMITER ',', QUOTE '\"', NULL 'null')", f)
+
+        # Set current directory to root
+        db.execute("INSERT INTO user_directories (user_id, current_directory) VALUES (%s, %s)", (user_id, str(user_id) + '_home'))

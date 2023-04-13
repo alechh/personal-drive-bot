@@ -36,6 +36,41 @@ def handle_backup(message):
     for file in os.listdir('backup'):
         os.remove(os.path.join('backup', file))
 
+@bot.message_handler(commands=['restore'])
+def handle_restore(message):
+    if not storage.check_user(message):
+        answer = 'Вас нет в базе, пропишите /start'
+        bot.send_message(message.chat.id, answer)
+        return
+    
+    bot.send_message(message.chat.id, 'Пришлите архив с бэкапом')
+    bot.register_next_step_handler(message, restore)
+
+def restore(message):
+    if message.document:
+        # Download backup file
+        file_info = bot.get_file(message.document.file_id)
+        backup_file = bot.download_file(file_info.file_path)
+
+        # Save backup file to disk
+        backup_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), message.document.file_name)
+        with open(backup_path, 'wb') as f:
+            f.write(backup_file)
+
+        # Restore backup
+        try:
+            storage.restore_backup(backup_path, message.from_user.id)
+            bot.reply_to(message, "Данные успешно восстановлены")
+        except Exception as e:
+            bot.reply_to(message, f"Ошибка восстановления данных: {e}")
+
+        # Remove backup file
+        os.remove(backup_path)
+    else:
+        bot.reply_to(message, "Это не файл, попробуйте еще раз /restore")
+
+
+
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
     answer = 'Неизвестная команда'
