@@ -1,6 +1,7 @@
 import telebot
 from utils import storage
 from decouple import config
+import os
 
 bot = telebot.TeleBot(config('token'))
 
@@ -11,6 +12,29 @@ def handle_start(message):
        bot.send_message(message.chat.id, 'Привет, ты уже есть в базе')
     elif res == 1:
          bot.send_message(message.chat.id, 'Привет, добавил тебя в базу')  
+
+@bot.message_handler(commands=['backup'])
+def handle_backup(message):
+    # Create folder for backups if it doesn't exist
+    if not os.path.exists('backup'):
+        os.mkdir('backup')
+    else:
+        # Delete old backups
+        for file in os.listdir('backup'):
+            os.remove(os.path.join('backup', file))
+
+    backup_path = storage.create_backup()
+
+    # Send backup file
+    with open(backup_path, 'rb') as backup_file:
+        bot.send_document(message.chat.id, backup_file, caption="Архив с бэкапом")
+
+    # Remove backup file
+    os.remove(backup_path)
+
+    # Remove backups
+    for file in os.listdir('backup'):
+        os.remove(os.path.join('backup', file))
 
 @bot.message_handler(content_types=['text'])
 def handle_text(message):

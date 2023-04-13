@@ -1,5 +1,7 @@
 from utils.db_connector import DB_Connector
 from decouple import config
+import tempfile
+import shutil
 
 def check_user(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
@@ -383,3 +385,17 @@ def mv(message):
     db.execute("INSERT INTO folder_files (folder_id, file_id) VALUES (%s, %s)", (target_folder_id, file_id))
     db.execute("DELETE FROM folder_files WHERE folder_id = %s AND file_id = %s", (current_directory, file_id))
     return 0
+
+def create_backup():
+    db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
+    backup_dir = './backup'
+
+    tables_to_backup = ['files', 'folders', 'folder_files']
+    
+    for table in tables_to_backup:
+        with tempfile.NamedTemporaryFile(mode='wb', delete=False, dir=backup_dir, prefix=f'{table}_', suffix='.csv') as backup_file:
+            db.make_backup(f"COPY {table} TO STDOUT WITH (FORMAT csv, HEADER true, DELIMITER ',', QUOTE '\"', ESCAPE '\\')", backup_file)
+
+    # backup_archive = shutil.make_archive(os.path.join(backup_dir, 'backup'), 'zip', root_dir=backup_dir)
+        backup_archive = shutil.make_archive(backup_dir, 'zip', root_dir=backup_dir)
+    return backup_archive
