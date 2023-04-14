@@ -436,3 +436,9 @@ def restore_backup(backup_path, user_id):
 
         # Set current directory to root
         db.execute("INSERT INTO user_directories (user_id, current_directory) VALUES (%s, %s)", (user_id, str(user_id) + '_home'))
+
+def stat(message):
+    db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
+
+    res = db.execute("SELECT count(*) FROM files WHERE user_id = %s", (message.from_user.id,))
+    return res[0][0]

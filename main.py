@@ -28,10 +28,24 @@ rm file_or_dir- Удалить файл \n\
 ./file - Получить файл"""
     
     bot.send_message(message.chat.id, answer)
-        
+
+@bot.message_handler(commands=['stat'])
+def stat(message):
+    if not storage.check_user(message):
+        answer = 'Вас нет в базе, пропишите /start'
+        bot.send_message(message.chat.id, answer)
+        return
+
+    number_of_files = storage.stat(message)
+    bot.reply_to(message, "Количество файлов: " + str(number_of_files))
 
 @bot.message_handler(commands=['backup'])
 def handle_backup(message):
+    if not storage.check_user(message):
+        answer = 'Вас нет в базе, пропишите /start'
+        bot.send_message(message.chat.id, answer)
+        return
+
     # Create folder for backups if it doesn't exist
     if not os.path.exists('backup'):
         os.mkdir('backup')
