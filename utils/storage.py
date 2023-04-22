@@ -354,6 +354,18 @@ def rm_folder_minus_r(message):
 
     return 0
 
+def check_folder_exists(db, target_folder_name, current_directory):
+    if target_folder_name == '..':
+        res = get_parent_folder_id(db, current_directory)
+        if res[0][0] == None:
+            return -3
+    else:
+        res = get_folder_id_by_name_and_parent(db, target_folder_name, current_directory)
+        if len(res) == 0:
+            return -2
+    
+    return 0
+
 def mv(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
@@ -376,14 +388,10 @@ def mv(message):
         else:
             target_folder_id = res[0]
             # It is a folder, lets check if target folder exists
-            if target_folder_name == '..':
-                res = get_parent_folder_id(db, current_directory)
-                if res[0][0] == None:
-                    return -3
-            else:
-                res = get_folder_id_by_name_and_parent(db, target_folder_name, current_directory)
-                if len(res) == 0:
-                    return -2
+            tmp_res = check_folder_exists(db, target_folder_name, current_directory)
+            if tmp_res != 0:
+                return tmp_res
+
             # Target folder exists, lets move folder
 
             db.execute("UPDATE folders SET parent_folder_id = %s WHERE folder_id = %s", (res[0], target_folder_id))
@@ -407,14 +415,9 @@ def mv(message):
         return -1
 
     # If found, check if target folder exists
-    if target_folder_name == '..':
-        res = get_parent_folder_id(db, current_directory)
-        if res[0][0] == None:
-            return -3
-    else:
-        res = get_folder_id_by_name_and_parent(db, target_folder_name, current_directory)
-        if len(res) == 0:
-            return -2
+    tmp_res = check_folder_exists(db, target_folder_name, current_directory)
+    if tmp_res != 0:
+        return tmp_res
 
     target_folder_id = res[0]
     insert_into_folder_files(db, target_folder_id, file_id)
