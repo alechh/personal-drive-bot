@@ -29,6 +29,9 @@ def get_files_in_directory(db, directory_id):
 def get_file_name_by_id(db, file_id):
     return db.execute("SELECT file_name FROM files WHERE file_id = %s", (file_id,))
 
+def get_parent_folder_id(db, folder_id):
+    return db.execute("SELECT parent_folder_id FROM folders WHERE folder_id = %s", (folder_id,))
+
 
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
@@ -71,7 +74,7 @@ def cd(message):
         current_directory = get_current_directory(db, message.from_user.id)
 
         # Get parent folder
-        res = db.execute("SELECT parent_folder_id FROM folders WHERE folder_id = %s", (current_directory))
+        res = get_parent_folder_id(db, current_directory)
         parent_folder = res[0]
 
         # Check if parent folder exists
@@ -347,7 +350,7 @@ def mv(message):
             target_folder_id = res[0]
             # It is a folder, lets check if target folder exists
             if target_folder_name == '..':
-                res = db.execute("SELECT parent_folder_id FROM folders WHERE folder_id = %s", (current_directory,))
+                res = get_parent_folder_id(db, current_directory)
                 if res[0][0] == None:
                     return -3
             else:
@@ -378,7 +381,7 @@ def mv(message):
 
     # If found, check if target folder exists
     if target_folder_name == '..':
-        res = db.execute("SELECT parent_folder_id FROM folders WHERE folder_id = %s", (current_directory,))
+        res = get_parent_folder_id(db, current_directory)
         if res[0][0] == None:
             return -3
     else:
