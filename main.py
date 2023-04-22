@@ -10,9 +10,9 @@ BOT_VERSION = '1.0.0'
 def handle_start(message):
     res = storage.add_new_user(message)
     if res == 0:
-       bot.send_message(message.chat.id, 'Привет, ты уже есть в базе')
+        bot.send_message(message.chat.id, 'Привет, ты уже есть в базе')
     elif res == 1:
-         bot.send_message(message.chat.id, 'Привет, добавил тебя в базу')  
+        bot.send_message(message.chat.id, 'Привет, добавил тебя в базу')  
 
 @bot.message_handler(commands=['version'])
 def version(message):
