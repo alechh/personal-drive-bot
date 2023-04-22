@@ -304,8 +304,8 @@ def get_file_id(message):
     while file_id not in files_in_current_dir and curr_index < len(res):
         curr_index += 1
         file_id = res[curr_index]
-    else:
-        if curr_index < len(res):
+
+    if curr_index < len(res):
             found = True
     
     # If found, return file_url
