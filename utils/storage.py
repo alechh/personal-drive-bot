@@ -57,6 +57,9 @@ def insert_into_folder_files(db, folder_id, file_id):
 def delete_from_folder_files(db, folder_id, file_id):
     db.execute("DELETE FROM folder_files WHERE folder_id = %s and file_id = %s", (folder_id, file_id))
 
+def delete_folder(db, folder_id):
+    db.execute("DELETE FROM folders WHERE folder_id = %s", (folder_id,))
+
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
@@ -273,7 +276,7 @@ def rm_folder(message):
         return -2
 
     # Delete folder from table folders
-    db.execute("DELETE FROM folders WHERE folder_id = %s", (folder_id))
+    delete_folder(db, folder_id)
 
     return 0
 
@@ -337,7 +340,7 @@ def rm_folder_minus_r(message):
     
     # Subfolders do not contain files, delete them
     for subfolder in subfolders:
-        db.execute("DELETE FROM folders WHERE folder_id = %s", (subfolder[0],))
+        delete_folder(db, subfolder[0])
 
     # Delete all files in target folder
     files = get_files_in_directory(db, target_folder_id)
@@ -345,7 +348,7 @@ def rm_folder_minus_r(message):
         db.execute("DELETE FROM files WHERE file_id = %s", (file[0],))
 
     # Delete target folder from table folders
-    db.execute("DELETE FROM folders WHERE folder_id = %s", target_folder_id)
+    delete_folder(db, target_folder_id)
 
     return 0
 
