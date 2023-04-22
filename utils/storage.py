@@ -20,6 +20,9 @@ def get_current_directory(db, user_id):
     res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (user_id,))
     return res[0]
 
+def get_folders_in_directory(db, directory_id):
+    return db.execute("SELECT * FROM folders WHERE parent_folder_id = %s", (directory_id,))
+
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
@@ -27,7 +30,7 @@ def ls(message):
     current_directory = get_current_directory(db, message.from_user.id)
 
     # Get all folders in current directory
-    folders = db.execute("SELECT * FROM folders WHERE parent_folder_id = %s", (current_directory))
+    folders = get_folders_in_directory(db, current_directory)
 
     folders_answer = ''
 
@@ -165,8 +168,8 @@ def save_file(message, file_id, file_name, file_url):
             return -1
         
     # Check if folder with the same name already exists in the current directory
-    res = db.execute("SELECT * FROM folders WHERE parent_folder_id = %s", (current_directory,))
-    for folder in res:
+    folders = get_folders_in_directory(db, current_directory)
+    for folder in folders:
         if folder[2] == file_name:
             return -2
     
@@ -233,7 +236,7 @@ def rm_folder(message):
         return -2
     
     # Check if folder contains other folders
-    res = db.execute("SELECT * FROM folders WHERE parent_folder_id = %s", (folder_id,))
+    res = get_folders_in_directory(db, folder_id)
     if len(res) != 0:
         return -2
 
