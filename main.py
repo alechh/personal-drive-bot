@@ -78,7 +78,7 @@ def handle_restore(message):
         answer = 'Вас нет в базе, пропишите /start'
         bot.send_message(message.chat.id, answer)
         return
-    
+
     bot.send_message(message.chat.id, 'Пришлите архив с бэкапом')
     bot.register_next_step_handler(message, restore)
 

@@ -125,7 +125,7 @@ def cd(message):
         # Update current directory
         update_current_directory(db, res[0][0], message.from_user.id)
         return 0
-    
+
 def mkdir(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
