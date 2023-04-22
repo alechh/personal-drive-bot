@@ -26,6 +26,9 @@ def get_folders_in_directory(db, directory_id):
 def get_files_in_directory(db, directory_id):
     return db.execute("SELECT file_id FROM folder_files WHERE folder_id = %s", (directory_id,))
 
+def get_file_name_by_id(db, file_id):
+    return db.execute("SELECT file_name FROM files WHERE file_id = %s", (file_id,))
+
 
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
@@ -50,7 +53,7 @@ def ls(message):
     # Add all files to answer
     for file in files:
         # Get file name by file id
-        res = db.execute("SELECT file_name FROM files WHERE file_id = %s", (file[0],))
+        res = get_file_name_by_id(db, file[0])
         file_name = res[0][0]
         files_answer += file_name + ' '
 
@@ -110,7 +113,7 @@ def mkdir(message):
     res = get_files_in_directory(db, current_directory)
     for file in res:
         # Get file name by file id
-        res = db.execute("SELECT file_name FROM files WHERE file_id = %s", (file[0],))
+        res = get_file_name_by_id(db, file[0])
         file_name = res[0][0]
         if file_name == new_folder_name:
             return -2
