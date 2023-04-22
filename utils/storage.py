@@ -354,7 +354,7 @@ def check_folder_exists(db, target_folder_name, current_directory):
         res = get_folder_id_by_name_and_parent(db, target_folder_name, current_directory)
         if len(res) == 0:
             return -2
-    
+
     return 0, res
 
 def mv(message):
