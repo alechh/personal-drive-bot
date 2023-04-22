@@ -188,7 +188,7 @@ def add_new_user(message):
         return 1
     else:
         return 0
-    
+
 def save_file(message, file_id, file_name, file_url):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
