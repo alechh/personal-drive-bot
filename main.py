@@ -19,7 +19,7 @@ def version(message):
     bot.send_message(message.chat.id, 'Текущая версия бота: ' + BOT_VERSION)
 
 @bot.message_handler(commands=['help'])
-def help(message):
+def send_help(message):
     answer = """
 /start - Старт бота \n\
 /help - Список команд \n\
