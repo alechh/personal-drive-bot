@@ -13,7 +13,7 @@ def check_user(message):
 
     if len(res) == 0:
         return False
-    
+
     return True
 
 def get_current_directory(db, user_id):

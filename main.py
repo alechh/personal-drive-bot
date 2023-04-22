@@ -12,7 +12,7 @@ def handle_start(message):
     if res == 0:
         bot.send_message(message.chat.id, 'Привет, ты уже есть в базе')
     elif res == 1:
-        bot.send_message(message.chat.id, 'Привет, добавил тебя в базу')  
+        bot.send_message(message.chat.id, 'Привет, добавил тебя в базу')
 
 @bot.message_handler(commands=['version'])
 def version(message):
@@ -31,7 +31,7 @@ cd dir - Перейти в директорию \n\
 mkdir dir - Создать директорию \n\
 rm file_or_dir- Удалить файл \n\
 ./file - Получить файл"""
-    
+
     bot.send_message(message.chat.id, answer)
 
 @bot.message_handler(commands=['stat'])

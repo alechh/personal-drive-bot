@@ -8,14 +8,14 @@ class DB_Connector:
         self.password = password
         self.database = database
         self.connection = self.connect()
-    
+
     def __del__(self):
         self.disconnect()
 
     def connect(self):
         try:
-            conn = psycopg2.connect(host=self.host, port=self.port, 
-                                database=self.database, user=self.user, 
+            conn = psycopg2.connect(host=self.host, port=self.port,
+                                database=self.database, user=self.user,
                                 password=self.password)
             return conn
         except:
