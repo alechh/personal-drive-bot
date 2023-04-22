@@ -16,12 +16,15 @@ def check_user(message):
     
     return True
 
+def get_current_directory(db, user_id):
+    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (user_id,))
+    return res[0]
+
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
     # Get current directory
-    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-    current_directory = res[0]
+    current_directory = get_current_directory(db, message.from_user.id)
 
     # Get all folders in current directory
     folders = db.execute("SELECT * FROM folders WHERE parent_folder_id = %s", (current_directory))
@@ -55,8 +58,7 @@ def cd(message):
     # Check if user wants to go to parent folder
     if (new_folder_name == '..'):
         # Get current directory
-        res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-        current_directory = res[0]
+        current_directory = get_current_directory(db, message.from_user.id)
 
         # Get parent folder
         res = db.execute("SELECT parent_folder_id FROM folders WHERE folder_id = %s", (current_directory))
@@ -71,8 +73,7 @@ def cd(message):
         return 0
 
     # Get current directory
-    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-    current_directory = res[0]
+    current_directory = get_current_directory(db, message.from_user.id)
 
     # Check if folder with the same name exists
     res = db.execute("SELECT * FROM folders WHERE folder_name = %s and parent_folder_id = %s", (new_folder_name, current_directory))
@@ -91,8 +92,7 @@ def mkdir(message):
     new_folder_name = message.text.split(' ')[1]
 
     # Get current directory
-    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-    current_directory = res[0][0]
+    current_directory = get_current_directory(db, message.from_user.id)[0]
 
     # Check if folder with the same name already exists
     res = db.execute("SELECT * FROM folders WHERE folder_name = %s and parent_folder_id = %s", (new_folder_name, current_directory))
@@ -120,8 +120,7 @@ def pwd(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
     # Get current directory
-    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-    current_directory = res[0]
+    current_directory = get_current_directory(db, message.from_user.id)
 
     # Get folder_name of current directory
     res = db.execute("SELECT * FROM folders WHERE folder_id = %s", (current_directory))
@@ -156,8 +155,7 @@ def save_file(message, file_id, file_name, file_url):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
     # Get current directory
-    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-    current_directory = res[0]
+    current_directory = get_current_directory(db, message.from_user.id)
 
     # Check if file with the same name already exists in the current directory
     res = db.execute("SELECT * FROM folder_files WHERE folder_id = %s", (current_directory,))
@@ -186,8 +184,7 @@ def rm_file(message):
     file_name = message.text.split(' ')[1]
 
     # Get current directory
-    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-    current_directory = res[0]
+    current_directory = get_current_directory(db, message.from_user.id)
 
     # Get all files in current directory
     files_in_current_dir = db.execute("SELECT file_id FROM folder_files WHERE folder_id = %s", (current_directory,))
@@ -221,8 +218,7 @@ def rm_folder(message):
     folder_name = message.text.split(' ')[1]
 
     # Get current directory
-    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-    current_directory = res[0]
+    current_directory = get_current_directory(db, message.from_user.id)
 
     # Get folder_id of folder to delete
     res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, current_directory))
@@ -252,8 +248,7 @@ def get_file_id(message):
     file_name = message.text.split('/')[1]
 
     # Get current directory
-    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-    current_directory = res[0]
+    current_directory = get_current_directory(db, message.from_user.id)
 
     # Get all files in current directory
     files_in_current_dir = db.execute("SELECT file_id FROM folder_files WHERE folder_id = %s", (current_directory,))
@@ -287,8 +282,7 @@ def rm_folder_minus_r(message):
     folder_name = message.text.split(' ')[2]
 
     # Get current directory
-    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-    current_directory = res[0]
+    current_directory = get_current_directory(db, message.from_user.id)
 
     # Get folder_id of folder to delete
     res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, current_directory))
@@ -327,8 +321,7 @@ def mv(message):
     target_folder_name = message.text.split(' ')[2]
 
     # Get current directory
-    res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (message.from_user.id,))
-    current_directory = res[0]
+    current_directory = get_current_directory(db, message.from_user.id)
 
     # Get all files in current directory
     files_in_current_dir = db.execute("SELECT file_id FROM folder_files WHERE folder_id = %s", (current_directory,))
