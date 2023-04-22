@@ -22,7 +22,7 @@ jobs:
         
     - name: Pull and run Docker image
       run: |
-        docker run --rm --name postgres-container -p 5432:5432 -e POSTGRES_USER=alechh -e POSTGRES_PASSWORD=123 -e POSTGRES_DB=postgres postgres:latest 
+        docker run --rm --name postgres-container -p 5432:5432 -e POSTGRES_USER=alechh -e POSTGRES_PASSWORD=123 -e POSTGRES_DB=postgres -d postgres:latest 
     
     - name: Install dependencies and run tests
       run: |
