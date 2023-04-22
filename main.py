@@ -159,7 +159,7 @@ def handle_text(message):
             answer = 'Удалил файл ' + message.text.split(' ')[1]
             bot.send_message(message.chat.id, answer)
             return
-        
+
         # If it's not a file, check if it's a folder
 
         # Check if it's a rm command with -r flag
@@ -184,7 +184,7 @@ def handle_text(message):
 
     elif 'mv ' in message.text and len(message.text.split(' ')) == 3:
         mv_res = storage.mv(message)
-        
+
         if mv_res == -3:
             answer = 'Вы находитесь в корневой папке'
         if mv_res == -2:
@@ -203,7 +203,7 @@ def handle_text(message):
             return
         else:
             answer = 'Нет такого файла'
-        
+
     bot.send_message(message.chat.id, answer)
 
 @bot.message_handler(content_types=['document'])
@@ -211,7 +211,7 @@ def handle_document(message):
     # Get file id, file name and file url
     file_info = bot.get_file(message.document.file_id)
     file_url = 'https://api.telegram.org/file/bot{}/{}'.format(bot.token, file_info.file_path)
-    
+
     file_name = message.document.file_name
     file_name = file_name.replace(' ', '_')
 

@@ -45,7 +45,7 @@ class DB_Connector:
                 return cur.fetchall()
         except:
             raise Exception("Failed to execute query: {}".format(query))
- 
+
     def restore_backup(self, query, backup_file):
         try:
             cur = self.connection.cursor()

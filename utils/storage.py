@@ -201,13 +201,13 @@ def save_file(message, file_id, file_name, file_url):
         res2 = db.execute("SELECT * FROM files WHERE file_id = %s", (file[1],))
         if res2[0][2] == file_name:
             return -1
-        
+
     # Check if folder with the same name already exists in the current directory
     folders = get_folders_in_directory(db, current_directory)
     for folder in folders:
         if folder[2] == file_name:
             return -2
-    
+
     # Add file to table files
     db.execute("INSERT INTO files (file_id, user_id, file_name, file_url) VALUES (%s, %s, %s, %s)", (file_id, message.from_user.id, file_name, file_url))
 
@@ -230,10 +230,10 @@ def rm_file(message):
     res = get_file_id_by_name(db, file_name, message.from_user.id)
     if len(res) == 0:
         return -1
-    
+
     found = False
     curr_index = 0
-    
+
     file_id = res[curr_index]
 
     # Try to find file_id in files_in_current_dir
@@ -243,7 +243,7 @@ def rm_file(message):
 
     if curr_index < len(res):
         found = True
-    
+
     # If found, delete file from table files and table folder_files
     if found:
         delete_from_folder_files(db, current_directory, file_id)
@@ -262,14 +262,14 @@ def rm_folder(message):
     res = get_folder_id_by_name_and_parent(db, folder_name, current_directory)
     if len(res) == 0:
         return -1
-    
+
     folder_id = res[0]
 
     # Check if folder contains files
     res = get_folder_files_by_folder_id(db, folder_id)
     if len(res) != 0:
         return -2
-    
+
     # Check if folder contains other folders
     res = get_folders_in_directory(db, folder_id)
     if len(res) != 0:
@@ -294,7 +294,7 @@ def get_file_id(message):
     res = get_file_id_by_name(db, file_name, message.from_user.id)
     if len(res) == 0:
         return -1
-    
+
     found = False
     curr_index = 0
 
@@ -307,11 +307,11 @@ def get_file_id(message):
 
     if curr_index < len(res):
             found = True
-    
+
     # If found, return file_url
     if found:
         return file_id[0]
-    
+
     return 0
 
 def rm_folder_minus_r(message):
@@ -326,7 +326,7 @@ def rm_folder_minus_r(message):
     res = get_folder_id_by_name_and_parent(db, folder_name, current_directory)
     if len(res) == 0:
         return -1
-    
+
     target_folder_id = res[0]
 
     # Delete all subfolders from table folders
@@ -337,7 +337,7 @@ def rm_folder_minus_r(message):
         res_files = get_folder_files_by_folder_id(db, subfolder[0])
         if len(res_files) != 0:
             return -2
-    
+
     # Subfolders do not contain files, delete them
     for subfolder in subfolders:
         delete_folder(db, subfolder[0])
@@ -386,7 +386,7 @@ def mv(message):
 
             db.execute("UPDATE folders SET parent_folder_id = %s WHERE folder_id = %s", (res[0], target_folder_id))
             return 1
-    
+
     # File exists, lets check if it is in current directory
     found = False
     curr_index = 0
@@ -400,7 +400,7 @@ def mv(message):
 
     if curr_index < len(res):
         found = True
-    
+
     if not found:
         return -1
 
@@ -413,7 +413,7 @@ def mv(message):
         res = get_folder_id_by_name_and_parent(db, target_folder_name, current_directory)
         if len(res) == 0:
             return -2
-        
+
     target_folder_id = res[0]
     insert_into_folder_files(db, target_folder_id, file_id)
     delete_from_folder_files(db, current_directory, file_id)
@@ -424,7 +424,7 @@ def create_backup():
     backup_dir = './backup'
 
     tables_to_backup = ['files', 'folders', 'folder_files']
-    
+
     for table in tables_to_backup:
         with tempfile.NamedTemporaryFile(mode='wb', delete=False, dir=backup_dir, prefix=f'{table}_', suffix='.csv') as backup_file:
             db.make_backup(f"COPY {table} TO STDOUT WITH (FORMAT csv, HEADER true, DELIMITER ',', QUOTE '\"', ESCAPE '\\', NULL 'null')", backup_file)
