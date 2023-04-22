@@ -1,5 +1,7 @@
 [![CI/CD Pipeline](https://github.com/alechh/personal-drive-bot/actions/workflows/tests.yml/badge.svg?branch=ci%2Fcd)](https://github.com/alechh/personal-drive-bot/actions/workflows/tests.yml)
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/1ab0987675a2409b9f4b8cdd7ae175fa)](https://app.codacy.com/gh/alechh/personal-drive-bot/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 # personal-drive-bot
 Телеграм бот для организации файлового хранилища внутри мессенджера Телеграм.
 
