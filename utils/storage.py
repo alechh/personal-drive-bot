@@ -45,6 +45,9 @@ def get_folder_name_by_id(db, folder_id):
 def get_folder_files_by_folder_id(db, folder_id):
     return db.execute("SELECT * FROM folder_files WHERE folder_id = %s", (folder_id,))
 
+def get_file_id_by_name(db, file_name, user_id):
+    return db.execute("SELECT file_id FROM files WHERE file_name = %s AND user_id = %s", (file_name, user_id))
+
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
@@ -212,7 +215,7 @@ def rm_file(message):
     # Get all files in current directory
     files_in_current_dir = get_files_in_directory(db, current_directory)
 
-    res = db.execute("SELECT file_id FROM files WHERE file_name = %s AND user_id = %s", (file_name, message.from_user.id))
+    res = get_file_id_by_name(db, file_name, message.from_user.id)
     if len(res) == 0:
         return -1
     
@@ -276,7 +279,7 @@ def get_file_id(message):
     # Get all files in current directory
     files_in_current_dir = get_files_in_directory(db, current_directory)
 
-    res = db.execute("SELECT file_id FROM files WHERE file_name = %s AND user_id = %s", (file_name, message.from_user.id))
+    res = get_file_id_by_name(db, file_name, message.from_user.id)
     if len(res) == 0:
         return -1
     
@@ -350,7 +353,7 @@ def mv(message):
     files_in_current_dir = get_files_in_directory(db, current_directory)
     files_in_current_dir = [file[0] for file in files_in_current_dir]
 
-    res = db.execute("SELECT file_id FROM files WHERE file_name = %s AND user_id = %s", (file_name, message.from_user.id))
+    res = get_file_id_by_name(db, file_name, message.from_user.id)
     if len(res) == 0:
         # File does not exist, lets check if it is a folder
         res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s AND parent_folder_id = %s", (file_name, current_directory))
