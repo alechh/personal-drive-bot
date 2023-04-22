@@ -22,8 +22,8 @@ jobs:
         
     - name: Pull and run Docker image
       run: |
-        docker run --rm --name postgres-container -e db_user=alechh -e db_pass=123 -e db_name=postgres -e db_port=5432 -p 5432:5432 -d postgres:latest
-        
+        docker run --rm --name postgres-container -p 5432:5432 -e POSTGRES_USER=alechh -e POSTGRES_PASSWORD=123 -e POSTGRES_DB=postgres postgres:latest 
+    
     - name: Install dependencies and run tests
       run: |
         python3 -m venv venv
