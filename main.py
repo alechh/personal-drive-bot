@@ -1,8 +1,10 @@
 import telebot
 from utils import storage
 from decouple import config
+import os
 
 bot = telebot.TeleBot(config('token'))
+BOT_VERSION = '1.0.0'
 
 @bot.message_handler(commands=['start'])
 def handle_start(message):
@@ -11,6 +13,99 @@ def handle_start(message):
        bot.send_message(message.chat.id, 'Привет, ты уже есть в базе')
     elif res == 1:
          bot.send_message(message.chat.id, 'Привет, добавил тебя в базу')  
+
+@bot.message_handler(commands=['version'])
+def version(message):
+    bot.send_message(message.chat.id, 'Текущая версия бота: ' + BOT_VERSION)
+
+@bot.message_handler(commands=['help'])
+def help(message):
+    answer = """
+/start - Старт бота \n\
+/help - Список команд \n\
+/backup - Создать бэкап \n\
+/restore - Восстановиться из бэкапа \n\n\
+pwd - Показать текущую директорию \n\
+ls - Показать содержимое текущей директории \n\
+cd dir - Перейти в директорию \n\
+mkdir dir - Создать директорию \n\
+rm file_or_dir- Удалить файл \n\
+./file - Получить файл"""
+    
+    bot.send_message(message.chat.id, answer)
+
+@bot.message_handler(commands=['stat'])
+def stat(message):
+    if not storage.check_user(message):
+        answer = 'Вас нет в базе, пропишите /start'
+        bot.send_message(message.chat.id, answer)
+        return
+
+    number_of_files = storage.stat(message)
+    bot.reply_to(message, "Количество файлов: " + str(number_of_files))
+
+@bot.message_handler(commands=['backup'])
+def handle_backup(message):
+    if not storage.check_user(message):
+        answer = 'Вас нет в базе, пропишите /start'
+        bot.send_message(message.chat.id, answer)
+        return
+
+    # Create folder for backups if it doesn't exist
+    if not os.path.exists('backup'):
+        os.mkdir('backup')
+    else:
+        # Delete old backups
+        for file in os.listdir('backup'):
+            os.remove(os.path.join('backup', file))
+
+    backup_path = storage.create_backup()
+
+    # Send backup file
+    with open(backup_path, 'rb') as backup_file:
+        bot.send_document(message.chat.id, backup_file, caption="Архив с бэкапом")
+
+    # Remove backup file
+    os.remove(backup_path)
+
+    # Remove backups
+    for file in os.listdir('backup'):
+        os.remove(os.path.join('backup', file))
+
+@bot.message_handler(commands=['restore'])
+def handle_restore(message):
+    if not storage.check_user(message):
+        answer = 'Вас нет в базе, пропишите /start'
+        bot.send_message(message.chat.id, answer)
+        return
+    
+    bot.send_message(message.chat.id, 'Пришлите архив с бэкапом')
+    bot.register_next_step_handler(message, restore)
+
+def restore(message):
+    if message.document:
+        # Download backup file
+        file_info = bot.get_file(message.document.file_id)
+        backup_file = bot.download_file(file_info.file_path)
+
+        # Save backup file to disk
+        backup_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), message.document.file_name)
+        with open(backup_path, 'wb') as f:
+            f.write(backup_file)
+
+        # Restore backup
+        try:
+            storage.restore_backup(backup_path, message.from_user.id)
+            bot.reply_to(message, "Данные успешно восстановлены")
+        except Exception as e:
+            bot.reply_to(message, f"Ошибка восстановления данных: {e}")
+
+        # Remove backup file
+        os.remove(backup_path)
+    else:
+        bot.reply_to(message, "Это не файл, попробуйте еще раз /restore")
+
+
 
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
