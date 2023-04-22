@@ -52,6 +52,36 @@ def delete_from_folder_files(db, folder_id, file_id):
 def delete_folder(db, folder_id):
     db.execute("DELETE FROM folders WHERE folder_id = %s", (folder_id,))
 
+def find_file(db, file_name, user_id):
+    # Get current directory
+    current_directory = get_current_directory(db, user_id)
+
+    # Get all files in current directory
+    files_in_current_dir = get_files_in_directory(db, current_directory)
+
+    res = get_file_id_by_name(db, file_name, user_id)
+    if len(res) == 0:
+        return False, -1
+
+    found = False
+    curr_index = 0
+
+    file_id = res[curr_index]
+
+    # Try to find file_id in files_in_current_dir
+    while file_id not in files_in_current_dir and curr_index < len(res):
+        curr_index += 1
+        file_id = res[curr_index]
+
+    if curr_index < len(res):
+        found = True
+
+    # If found, return file_url
+    if found:
+        return True, file_id[0]
+    
+    return False, -1
+
 def check_user(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
@@ -223,34 +253,16 @@ def rm_file(message):
 
     file_name = message.text.split(' ')[1]
 
-    # Get current directory
-    current_directory = get_current_directory(db, message.from_user.id)
-
-    # Get all files in current directory
-    files_in_current_dir = get_files_in_directory(db, current_directory)
-
-    res = get_file_id_by_name(db, file_name, message.from_user.id)
-    if len(res) == 0:
-        return -1
-
-    found = False
-    curr_index = 0
-
-    file_id = res[curr_index]
-
-    # Try to find file_id in files_in_current_dir
-    while file_id not in files_in_current_dir and curr_index < len(res):
-        curr_index += 1
-        file_id = res[curr_index]
-
-    if curr_index < len(res):
-        found = True
+    found, file_id = find_file(db, file_name, message.from_user.id)
 
     # If found, delete file from table files and table folder_files
     if found:
+        current_directory = get_current_directory(db, message.from_user.id)
         delete_from_folder_files(db, current_directory, file_id)
         db.execute("DELETE FROM files WHERE file_id = %s AND user_id = %s", (file_id, message.from_user.id))
-    return 0
+        return 0
+    else:
+        return -1
 
 def rm_folder(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
@@ -287,34 +299,13 @@ def get_file_id(message):
 
     file_name = message.text.split('/')[1]
 
-    # Get current directory
-    current_directory = get_current_directory(db, message.from_user.id)
+    found, file_id = find_file(db, file_name, message.from_user.id)
 
-    # Get all files in current directory
-    files_in_current_dir = get_files_in_directory(db, current_directory)
-
-    res = get_file_id_by_name(db, file_name, message.from_user.id)
-    if len(res) == 0:
+    if found:
+        return file_id
+    else:
         return -1
 
-    found = False
-    curr_index = 0
-
-    file_id = res[curr_index]
-
-    # Try to find file_id in files_in_current_dir
-    while file_id not in files_in_current_dir and curr_index < len(res):
-        curr_index += 1
-        file_id = res[curr_index]
-
-    if curr_index < len(res):
-            found = True
-
-    # If found, return file_url
-    if found:
-        return file_id[0]
-
-    return 0
 
 def rm_folder_minus_r(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
