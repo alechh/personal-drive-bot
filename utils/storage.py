@@ -79,7 +79,7 @@ def find_file(db, file_name, user_id):
     # If found, return file_url
     if found:
         return True, file_id[0]
-    
+
     return False, -1
 
 def check_user(message):
