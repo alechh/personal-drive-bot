@@ -115,7 +115,7 @@ def handle_text(message):
         answer = 'Вас нет в базе, пропишите /start'
         bot.send_message(message.chat.id, answer)
         return
-        
+    
     if message.text == 'pwd':
         answer = storage.pwd(message)
 

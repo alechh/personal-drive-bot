@@ -138,7 +138,7 @@ def mkdir(message):
     res = get_folders_by_name_and_parent(db, new_folder_name, current_directory)
     if len(res) != 0:
         return -1
-    
+
     # Check if file with the same name already exists
     res = get_files_in_directory(db, current_directory)
     for file in res:
