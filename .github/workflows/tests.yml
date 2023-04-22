@@ -3,10 +3,12 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - ci/cd
+      - dev
+      - master
   pull_request:
     branches:
-      - ci/cd
+      - dev
+      - master
 
 jobs:
   build_and_test:
