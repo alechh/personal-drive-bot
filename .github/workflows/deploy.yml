@@ -33,5 +33,7 @@ jobs:
         HOST: ${{ secrets.YANDEX_CLOUD_HOST }}
         USER: ${{ secrets.YANDEX_CLOUD_USER }}
       run: |
-        scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r . ${{ env.USER }}@${{ env.HOST }}:/home/alechh/app/personal-drive-bot
-        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ env.USER }}@${{ env.HOST }} "cd /home/alechh/app/personal-drive-bot && docker-compose down && docker-compose up --build -d"
+        run: |
+        tar czf bot.tar.gz .
+        scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null bot.tar.gz ${{ env.USER }}@${{ env.HOST }}:/home/alechh/app/personal-drive-bot
+        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ env.USER }}@${{ env.HOST }} "cd /home/alechh/app/personal-drive-bot && tar xf bot.tar.gz && rm bot.tar.gz && docker-compose down && docker-compose up -d"
