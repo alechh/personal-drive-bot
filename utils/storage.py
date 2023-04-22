@@ -32,6 +32,8 @@ def get_file_name_by_id(db, file_id):
 def get_parent_folder_id(db, folder_id):
     return db.execute("SELECT parent_folder_id FROM folders WHERE folder_id = %s", (folder_id,))
 
+def update_current_directory(db, directory_id, user_id):
+    db.execute("UPDATE user_directories SET current_directory = %s WHERE user_id = %s", (directory_id, user_id))
 
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
@@ -82,7 +84,7 @@ def cd(message):
             return -3
 
         # Update current directory
-        db.execute("UPDATE user_directories SET current_directory = %s WHERE user_id = %s", (parent_folder, message.from_user.id))
+        update_current_directory(db, parent_folder, message.from_user.id)
         return 0
 
     # Get current directory
@@ -96,7 +98,7 @@ def cd(message):
         return -1
     elif len(res) == 1:
         # Update current directory
-        db.execute("UPDATE user_directories SET current_directory = %s WHERE user_id = %s", (res[0][0], message.from_user.id))
+        update_current_directory(db, res[0][0], message.from_user.id)
         return 0
     
 def mkdir(message):
