@@ -4,6 +4,7 @@ from decouple import config
 import os
 
 bot = telebot.TeleBot(config('token'))
+BOT_VERSION = '1.0.1'
 
 @bot.message_handler(commands=['start'])
 def handle_start(message):
@@ -12,6 +13,10 @@ def handle_start(message):
        bot.send_message(message.chat.id, 'Привет, ты уже есть в базе')
     elif res == 1:
          bot.send_message(message.chat.id, 'Привет, добавил тебя в базу')  
+
+@bot.message_handler(commands=['version'])
+def version(message):
+    bot.send_message(message.chat.id, 'Текущая версия бота: ' + BOT_VERSION)
 
 @bot.message_handler(commands=['help'])
 def help(message):
