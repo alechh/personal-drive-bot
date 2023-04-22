@@ -10,16 +10,16 @@ BOT_VERSION = '1.0.0'
 def handle_start(message):
     res = storage.add_new_user(message)
     if res == 0:
-       bot.send_message(message.chat.id, 'Привет, ты уже есть в базе')
+        bot.send_message(message.chat.id, 'Привет, ты уже есть в базе')
     elif res == 1:
-         bot.send_message(message.chat.id, 'Привет, добавил тебя в базу')  
+        bot.send_message(message.chat.id, 'Привет, добавил тебя в базу')
 
 @bot.message_handler(commands=['version'])
 def version(message):
     bot.send_message(message.chat.id, 'Текущая версия бота: ' + BOT_VERSION)
 
 @bot.message_handler(commands=['help'])
-def help(message):
+def send_help(message):
     answer = """
 /start - Старт бота \n\
 /help - Список команд \n\
@@ -30,8 +30,9 @@ ls - Показать содержимое текущей директории \
 cd dir - Перейти в директорию \n\
 mkdir dir - Создать директорию \n\
 rm file_or_dir- Удалить файл \n\
+mv file_name folder_name - Переместить файл в папку \n\
 ./file - Получить файл"""
-    
+
     bot.send_message(message.chat.id, answer)
 
 @bot.message_handler(commands=['stat'])
@@ -78,7 +79,7 @@ def handle_restore(message):
         answer = 'Вас нет в базе, пропишите /start'
         bot.send_message(message.chat.id, answer)
         return
-    
+
     bot.send_message(message.chat.id, 'Пришлите архив с бэкапом')
     bot.register_next_step_handler(message, restore)
 
@@ -105,21 +106,19 @@ def restore(message):
     else:
         bot.reply_to(message, "Это не файл, попробуйте еще раз /restore")
 
+def send_unknown_command_message(message):
+    bot.reply_to(message, 'Неизвестная команда')
 
+def send_unknown_user_message(message):
+    bot.reply_to(message, 'Вас нет в базе, пропишите /start')
 
-@bot.message_handler(content_types=['text'])
-def handle_text(message):
-    answer = 'Неизвестная команда'
+def handle_pwd(message):
+    answer = storage.pwd(message)
+    bot.send_message(message.chat.id, answer)
 
-    if not storage.check_user(message):
-        answer = 'Вас нет в базе, пропишите /start'
-        bot.send_message(message.chat.id, answer)
-        return
-        
-    if message.text == 'pwd':
-        answer = storage.pwd(message)
-
-    elif 'mkdir ' in message.text and len(message.text.split(' ')) == 2:
+def handle_mkdir(message):
+    if len(message.text.split(' ')) == 2:
+        answer = ''
         mkdir_res = storage.mkdir(message)
         if mkdir_res == -1:
             answer = 'Папка с таким именем уже есть'
@@ -128,7 +127,14 @@ def handle_text(message):
         else:
             answer = 'Создал папку'
 
-    elif 'cd ' in message.text and len(message.text.split(' ')) == 2:
+    else:
+        answer = 'Неверное количество аргументов'
+
+    bot.send_message(message.chat.id, answer)
+
+def handle_cd(message):
+    if len(message.text.split(' ')) == 2:
+        answer = ''
         res = storage.cd(message)
         if res == -1:
             answer = 'Нет такой папки'
@@ -137,29 +143,38 @@ def handle_text(message):
         else:
             answer = 'Перешел в папку ' + storage.pwd(message)
 
-    elif message.text == 'ls':
-        folders_res, files_res = storage.ls(message)
+    else:
+        answer = 'Неверное количество аргументов'
 
-        if folders_res != None or files_res != None:
-            answer = storage.pwd(message) + '\n\n'
+    bot.send_message(message.chat.id, answer)
 
-        if folders_res == '':
-            answer += 'Папок нет'
-        else:
-            answer += 'Папки: ' + folders_res
+def handle_ls(message):
+    answer = ''
+    folders_res, files_res = storage.ls(message)
 
-        if files_res == '':
-            answer += '\nФайлов нет'
-        else:
-            answer += '\nФайлы: ' + files_res
+    if folders_res != None or files_res != None:
+        answer = storage.pwd(message) + '\n\n'
 
-    elif 'rm ' in message.text and len(message.text.split(' ')) > 1 and len(message.text.split(' ')) < 4:
+    if folders_res == '':
+        answer += 'Папок нет'
+    else:
+        answer += 'Папки: ' + folders_res
+
+    if files_res == '':
+        answer += '\nФайлов нет'
+    else:
+        answer += '\nФайлы: ' + files_res
+
+    bot.send_message(message.chat.id, answer)
+
+def handle_rm(message):
+    if len(message.text.split(' ')) > 1 and len(message.text.split(' ')) < 4:
         # First check if it's a file
         if storage.rm_file(message) != -1:
             answer = 'Удалил файл ' + message.text.split(' ')[1]
             bot.send_message(message.chat.id, answer)
             return
-        
+
         # If it's not a file, check if it's a folder
 
         # Check if it's a rm command with -r flag
@@ -181,10 +196,15 @@ def handle_text(message):
                 answer = 'Папка не пуста, чтобы удалить её вместе с содержимым, пропишите rm -r'
             else:
                 answer = 'Нет такого файла или папки для удаления'
+    else:
+        answer = 'Неверное количество аргументов'
 
-    elif 'mv ' in message.text and len(message.text.split(' ')) == 3:
+    bot.send_message(message.chat.id, answer)
+
+def handle_mv(message):
+    if len(message.text.split(' ')) == 3:
         mv_res = storage.mv(message)
-        
+
         if mv_res == -3:
             answer = 'Вы находитесь в корневой папке'
         if mv_res == -2:
@@ -195,23 +215,53 @@ def handle_text(message):
             answer = 'Переместил файл {} в папку {}'.format(message.text.split(' ')[1], message.text.split(' ')[2])
         elif mv_res == 1:
             answer = 'Переместил папку {} в папку {}'.format(message.text.split(' ')[1], message.text.split(' ')[2])
+    else:
+        answer = 'Неверное количество аргументов'
 
-    elif './' in message.text:
-        file_id = storage.get_file_id(message)
-        if file_id != 0 and file_id != -1:
-            bot.send_document(message.chat.id, file_id, reply_to_message_id=message.message_id)
-            return
-        else:
-            answer = 'Нет такого файла'
-        
     bot.send_message(message.chat.id, answer)
+
+def handle_execute(message):
+    file_id = storage.get_file_id(message)
+    if file_id != 0 and file_id != -1:
+        bot.send_document(message.chat.id, file_id, reply_to_message_id=message.message_id)
+        return
+    else:
+        answer = 'Нет такого файла'
+
+    bot.send_message(message.chat.id, answer)
+
+@bot.message_handler(content_types=['text'])
+def handle_text_message(message):
+    if not storage.check_user(message):
+        send_unknown_user_message(message)
+        return
+
+    dispatcher = {
+        'pwd': handle_pwd,
+        'mkdir': handle_mkdir,
+        'cd': handle_cd,
+        'ls': handle_ls,
+        'rm': handle_rm,
+        'mv': handle_mv,
+    }
+
+    if './' in message.text:
+        handle_execute(message)
+        return
+
+    command = message.text.split(' ')[0]
+
+    if command in dispatcher:
+        dispatcher[command](message)
+    else:
+        send_unknown_command_message(message)
 
 @bot.message_handler(content_types=['document'])
 def handle_document(message):
     # Get file id, file name and file url
     file_info = bot.get_file(message.document.file_id)
     file_url = 'https://api.telegram.org/file/bot{}/{}'.format(bot.token, file_info.file_path)
-    
+
     file_name = message.document.file_name
     file_name = file_name.replace(' ', '_')
 
