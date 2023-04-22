@@ -43,8 +43,8 @@ class DB_Connector:
             cur.copy_expert(query, backup_file)
             if 'SELECT' in query:
                 return cur.fetchall()
-        except:
-            raise Exception("Failed to execute query: {}".format(query))
+        except Exception as e:
+            raise Exception("Failed to make backup: {}".format(e))
 
     def restore_backup(self, query, backup_file):
         try:
@@ -53,6 +53,6 @@ class DB_Connector:
             self.connection.commit()
             if 'SELECT' in query:
                 return cur.fetchall()
-        except Exception:
-            raise Exception("Failed to restore: {}".format(query))
+        except Exception as e:
+            raise Exception("Failed to restore: {}".format(e))
 
