@@ -24,7 +24,7 @@ class DB_Connector:
     def disconnect(self):
         try:
             self.connection.close()
-        except:
+        except Exception:
             print("Failed to disconnect from  database on {}:{}".format(self.host, self.port))
 
     def execute(self, query, params=None):
@@ -53,6 +53,6 @@ class DB_Connector:
             self.connection.commit()
             if 'SELECT' in query:
                 return cur.fetchall()
-        except Exception as e:
+        except Exception:
             raise Exception("Failed to restore: {}".format(query))
 
