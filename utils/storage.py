@@ -38,6 +38,10 @@ def update_current_directory(db, directory_id, user_id):
 def get_folders_by_name_and_parent(db, folder_name, parent_directory):
     res = db.execute("SELECT * FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, parent_directory))
 
+def get_folder_name_by_id(db, folder_id):
+    res = db.execute("SELECT * FROM folders WHERE folder_id = %s", (folder_id))
+    return res[0]
+
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
@@ -141,15 +145,13 @@ def pwd(message):
     current_directory = get_current_directory(db, message.from_user.id)
 
     # Get folder_name of current directory
-    res = db.execute("SELECT * FROM folders WHERE folder_id = %s", (current_directory))
-    res_tuple = res[0]
+    res_tuple = get_folder_name_by_id(db, current_directory)
     current_directory_name = res_tuple[2]
 
     # Get full folder path (res_tuple[3] -- parent_folder_id)
     while res_tuple[3] != None:
         # Get folder_name of parent folder
-        res = db.execute("SELECT * FROM folders WHERE folder_id = %s", (res_tuple[3],))
-        res_tuple = res[0]
+        res_tuple = get_folder_name_by_id(db, res_tuple[3])
 
         # Add parent folder name to current directory name
         current_directory_name = res_tuple[2] + '/' + current_directory_name
