@@ -397,9 +397,9 @@ def mv(message):
     while file_id[0] not in files_in_current_dir and curr_index < len(res):
         curr_index += 1
         file_id = res[curr_index]
-    else:
-        if curr_index < len(res):
-            found = True
+
+    if curr_index < len(res):
+        found = True
     
     if not found:
         return -1
