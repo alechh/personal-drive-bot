@@ -129,7 +129,7 @@ def handle_mkdir(message):
 
     else:
         answer = 'Неверное количество аргументов'
-    
+
     bot.send_message(message.chat.id, answer)
 
 def handle_cd(message):
@@ -142,7 +142,7 @@ def handle_cd(message):
             answer = 'Вы находитесь в корневой папке'
         else:
             answer = 'Перешел в папку ' + storage.pwd(message)
-        
+ 
     else:
         answer = 'Неверное количество аргументов'
 
