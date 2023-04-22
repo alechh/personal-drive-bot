@@ -142,7 +142,7 @@ def handle_cd(message):
             answer = 'Вы находитесь в корневой папке'
         else:
             answer = 'Перешел в папку ' + storage.pwd(message)
- 
+
     else:
         answer = 'Неверное количество аргументов'
 
@@ -164,7 +164,7 @@ def handle_ls(message):
         answer += '\nФайлов нет'
     else:
         answer += '\nФайлы: ' + files_res
-    
+
     bot.send_message(message.chat.id, answer)
 
 def handle_rm(message):
@@ -198,7 +198,7 @@ def handle_rm(message):
                 answer = 'Нет такого файла или папки для удаления'
     else:
         answer = 'Неверное количество аргументов'
-    
+
     bot.send_message(message.chat.id, answer)
 
 def handle_mv(message):
@@ -217,7 +217,7 @@ def handle_mv(message):
             answer = 'Переместил папку {} в папку {}'.format(message.text.split(' ')[1], message.text.split(' ')[2])
     else:
         answer = 'Неверное количество аргументов'
-    
+
     bot.send_message(message.chat.id, answer)
 
 def handle_execute(message):
@@ -227,7 +227,7 @@ def handle_execute(message):
         return
     else:
         answer = 'Нет такого файла'
-    
+
     bot.send_message(message.chat.id, answer)
 
 @bot.message_handler(content_types=['text'])
