@@ -34,8 +34,8 @@ class DB_Connector:
             self.connection.commit()
             if 'SELECT' in query:
                 return cur.fetchall()
-        except:
-            raise Exception("Failed to execute query: {}".format(query))
+        except Exception as e:
+            raise Exception("Failed to execute query: {}: {}".format(query, e))
 
     def make_backup(self, query, backup_file):
         try:
