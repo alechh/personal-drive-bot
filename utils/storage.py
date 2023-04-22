@@ -364,7 +364,7 @@ def check_folder_exists(db, target_folder_name, current_directory):
         if len(res) == 0:
             return -2
     
-    return 0
+    return 0, res
 
 def mv(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
@@ -388,7 +388,7 @@ def mv(message):
         else:
             target_folder_id = res[0]
             # It is a folder, lets check if target folder exists
-            tmp_res = check_folder_exists(db, target_folder_name, current_directory)
+            tmp_res, res = check_folder_exists(db, target_folder_name, current_directory)
             if tmp_res != 0:
                 return tmp_res
 
@@ -415,7 +415,7 @@ def mv(message):
         return -1
 
     # If found, check if target folder exists
-    tmp_res = check_folder_exists(db, target_folder_name, current_directory)
+    tmp_res, res = check_folder_exists(db, target_folder_name, current_directory)
     if tmp_res != 0:
         return tmp_res
 
