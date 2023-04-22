@@ -108,7 +108,7 @@ def restore(message):
 
 
 @bot.message_handler(content_types=['text'])
-def handle_text(message):
+def handle_text_message(message):
     answer = 'Неизвестная команда'
 
     if not storage.check_user(message):
