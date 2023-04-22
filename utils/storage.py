@@ -36,7 +36,7 @@ def update_current_directory(db, directory_id, user_id):
     db.execute("UPDATE user_directories SET current_directory = %s WHERE user_id = %s", (directory_id, user_id))
 
 def get_folders_by_name_and_parent(db, folder_name, parent_directory):
-    res = db.execute("SELECT * FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, parent_directory))
+    return db.execute("SELECT * FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, parent_directory))
 
 def get_folder_name_by_id(db, folder_id):
     res = db.execute("SELECT * FROM folders WHERE folder_id = %s", (folder_id,))
