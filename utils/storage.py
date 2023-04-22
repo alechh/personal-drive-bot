@@ -39,7 +39,7 @@ def get_folders_by_name_and_parent(db, folder_name, parent_directory):
     res = db.execute("SELECT * FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, parent_directory))
 
 def get_folder_name_by_id(db, folder_id):
-    res = db.execute("SELECT * FROM folders WHERE folder_id = %s", (folder_id))
+    res = db.execute("SELECT * FROM folders WHERE folder_id = %s", (folder_id,))
     return res[0]
 
 def get_folder_files_by_folder_id(db, folder_id):
