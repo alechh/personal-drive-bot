@@ -2,8 +2,8 @@ name: Deploy to Yandex Cloud
 
 on:
   push:
-    branches:
-      - ci/cd
+    tags:
+      - '*'
 
 jobs:
   deploy:
