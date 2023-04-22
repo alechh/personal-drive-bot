@@ -30,6 +30,7 @@ ls - Показать содержимое текущей директории \
 cd dir - Перейти в директорию \n\
 mkdir dir - Создать директорию \n\
 rm file_or_dir- Удалить файл \n\
+mv file_name folder_name - Переместить файл в папку \n\
 ./file - Получить файл"""
 
     bot.send_message(message.chat.id, answer)
