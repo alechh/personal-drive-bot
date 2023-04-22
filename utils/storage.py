@@ -42,6 +42,9 @@ def get_folder_name_by_id(db, folder_id):
     res = db.execute("SELECT * FROM folders WHERE folder_id = %s", (folder_id,))
     return res[0]
 
+def get_folder_id_by_name_and_parent(db, folder_name, parent_directory):
+    return db.execute("SELECT folder_id FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, parent_directory))
+
 def get_folder_files_by_folder_id(db, folder_id):
     return db.execute("SELECT * FROM folder_files WHERE folder_id = %s", (folder_id,))
 
@@ -247,7 +250,7 @@ def rm_folder(message):
     current_directory = get_current_directory(db, message.from_user.id)
 
     # Get folder_id of folder to delete
-    res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, current_directory))
+    res = get_folder_id_by_name_and_parent(db, folder_name, current_directory)
     if len(res) == 0:
         return -1
     
@@ -311,7 +314,7 @@ def rm_folder_minus_r(message):
     current_directory = get_current_directory(db, message.from_user.id)
 
     # Get folder_id of folder to delete
-    res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, current_directory))
+    res = get_folder_id_by_name_and_parent(db, folder_name, current_directory)
     if len(res) == 0:
         return -1
     
@@ -356,7 +359,7 @@ def mv(message):
     res = get_file_id_by_name(db, file_name, message.from_user.id)
     if len(res) == 0:
         # File does not exist, lets check if it is a folder
-        res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s AND parent_folder_id = %s", (file_name, current_directory))
+        res = get_folder_id_by_name_and_parent(db, file_name, current_directory)
         if len(res) == 0:
             return -1
         else:
@@ -367,7 +370,7 @@ def mv(message):
                 if res[0][0] == None:
                     return -3
             else:
-                res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s AND parent_folder_id = %s", (target_folder_name, current_directory))
+                res = get_folder_id_by_name_and_parent(db, target_folder_name, current_directory)
                 if len(res) == 0:
                     return -2
             # Target folder exists, lets move folder
@@ -398,7 +401,7 @@ def mv(message):
         if res[0][0] == None:
             return -3
     else:
-        res = db.execute("SELECT folder_id FROM folders WHERE folder_name = %s AND parent_folder_id = %s", (target_folder_name, current_directory))
+        res = get_folder_id_by_name_and_parent(db, target_folder_name, current_directory)
         if len(res) == 0:
             return -2
         
