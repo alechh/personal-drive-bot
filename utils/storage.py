@@ -35,6 +35,9 @@ def get_parent_folder_id(db, folder_id):
 def update_current_directory(db, directory_id, user_id):
     db.execute("UPDATE user_directories SET current_directory = %s WHERE user_id = %s", (directory_id, user_id))
 
+def get_folders_by_name_and_parent(db, folder_name, parent_directory):
+    res = db.execute("SELECT * FROM folders WHERE folder_name = %s and parent_folder_id = %s", (folder_name, parent_directory))
+
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
@@ -91,7 +94,7 @@ def cd(message):
     current_directory = get_current_directory(db, message.from_user.id)
 
     # Check if folder with the same name exists
-    res = db.execute("SELECT * FROM folders WHERE folder_name = %s and parent_folder_id = %s", (new_folder_name, current_directory))
+    res = get_folders_by_name_and_parent(db, new_folder_name, current_directory)
 
     if len(res) == 0:
         # Folder with the same name doesn't exist
@@ -110,7 +113,7 @@ def mkdir(message):
     current_directory = get_current_directory(db, message.from_user.id)[0]
 
     # Check if folder with the same name already exists
-    res = db.execute("SELECT * FROM folders WHERE folder_name = %s and parent_folder_id = %s", (new_folder_name, current_directory))
+    res = get_folders_by_name_and_parent(db, new_folder_name, current_directory)
     if len(res) != 0:
         return -1
     
