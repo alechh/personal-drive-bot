@@ -51,6 +51,12 @@ def get_folder_files_by_folder_id(db, folder_id):
 def get_file_id_by_name(db, file_name, user_id):
     return db.execute("SELECT file_id FROM files WHERE file_name = %s AND user_id = %s", (file_name, user_id))
 
+def insert_into_folder_files(db, folder_id, file_id):
+    db.execute("INSERT INTO folder_files (folder_id, file_id) VALUES (%s, %s)", (folder_id, file_id))
+
+def delete_from_folder_files(db, folder_id, file_id):
+    db.execute("DELETE FROM folder_files WHERE folder_id = %s and file_id = %s", (folder_id, file_id))
+
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
@@ -203,7 +209,7 @@ def save_file(message, file_id, file_name, file_url):
     db.execute("INSERT INTO files (file_id, user_id, file_name, file_url) VALUES (%s, %s, %s, %s)", (file_id, message.from_user.id, file_name, file_url))
 
     # Add file to table folder_files
-    db.execute("INSERT INTO folder_files (folder_id, file_id) VALUES (%s, %s)", (current_directory, file_id))
+    insert_into_folder_files(db, current_directory, file_id)
 
     return 0
 
@@ -237,7 +243,7 @@ def rm_file(message):
     
     # If found, delete file from table files and table folder_files
     if found:
-        db.execute("DELETE FROM folder_files WHERE folder_id = %s and file_id = %s", (current_directory, file_id))
+        delete_from_folder_files(db, current_directory, file_id)
         db.execute("DELETE FROM files WHERE file_id = %s AND user_id = %s", (file_id, message.from_user.id))
     return 0
 
@@ -406,8 +412,8 @@ def mv(message):
             return -2
         
     target_folder_id = res[0]
-    db.execute("INSERT INTO folder_files (folder_id, file_id) VALUES (%s, %s)", (target_folder_id, file_id))
-    db.execute("DELETE FROM folder_files WHERE folder_id = %s AND file_id = %s", (current_directory, file_id))
+    insert_into_folder_files(db, target_folder_id, file_id)
+    delete_from_folder_files(db, current_directory, file_id)
     return 0
 
 def create_backup():
