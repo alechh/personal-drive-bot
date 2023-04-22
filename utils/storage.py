@@ -42,6 +42,9 @@ def get_folder_name_by_id(db, folder_id):
     res = db.execute("SELECT * FROM folders WHERE folder_id = %s", (folder_id))
     return res[0]
 
+def get_folder_files_by_folder_id(db, folder_id):
+    return db.execute("SELECT * FROM folder_files WHERE folder_id = %s", (folder_id,))
+
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
@@ -178,7 +181,7 @@ def save_file(message, file_id, file_name, file_url):
     current_directory = get_current_directory(db, message.from_user.id)
 
     # Check if file with the same name already exists in the current directory
-    res = db.execute("SELECT * FROM folder_files WHERE folder_id = %s", (current_directory,))
+    res = get_folder_files_by_folder_id(db, current_directory)
     for file in res:
         res2 = db.execute("SELECT * FROM files WHERE file_id = %s", (file[1],))
         if res2[0][2] == file_name:
@@ -248,7 +251,7 @@ def rm_folder(message):
     folder_id = res[0]
 
     # Check if folder contains files
-    res = db.execute("SELECT * FROM folder_files WHERE folder_id = %s", (folder_id,))
+    res = get_folder_files_by_folder_id(db, folder_id)
     if len(res) != 0:
         return -2
     
@@ -316,7 +319,7 @@ def rm_folder_minus_r(message):
 
     # Check if subfolder contains files, if so, return -2
     for subfolder in subfolders:
-        res_files = db.execute("SELECT * FROM folder_files WHERE folder_id = %s", (subfolder[0],))
+        res_files = get_folder_files_by_folder_id(db, subfolder[0])
         if len(res_files) != 0:
             return -2
     
