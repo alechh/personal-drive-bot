@@ -4,7 +4,7 @@ from decouple import config
 import os
 
 bot = telebot.TeleBot(config('token'))
-BOT_VERSION = '1.0.0'
+BOT_VERSION = '1.0.1'
 
 @bot.message_handler(commands=['start'])
 def handle_start(message):
