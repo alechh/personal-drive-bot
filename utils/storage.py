@@ -5,16 +5,8 @@ import shutil
 import zipfile
 import os
 
-def check_user(message):
-    db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
-
-    # Check if user is in database
-    res = db.execute("SELECT * FROM users WHERE user_id = %s", (message.from_user.id,))
-
-    if len(res) == 0:
-        return False
-
-    return True
+def get_user_by_id(db, user_id):
+    return db.execute("SELECT * FROM users WHERE user_id = %s", (user_id,))
 
 def get_current_directory(db, user_id):
     res = db.execute("SELECT current_directory FROM user_directories WHERE user_id = %s", (user_id,))
@@ -59,6 +51,16 @@ def delete_from_folder_files(db, folder_id, file_id):
 
 def delete_folder(db, folder_id):
     db.execute("DELETE FROM folders WHERE folder_id = %s", (folder_id,))
+
+def check_user(message):
+    db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
+
+    user = get_user_by_id(db, message.from_user.id)
+
+    if len(user) == 0:
+        return False
+
+    return True
 
 def ls(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
@@ -180,7 +182,7 @@ def add_new_user(message):
     db = DB_Connector(config("db_host"), config("db_port"), config("db_user"), config("db_pass"), config("db_name"))
 
     # Check if the user exists in table users
-    res = db.execute("SELECT * FROM users WHERE user_id = %s", (message.from_user.id,))
+    res = get_user_by_id(db, message.from_user.id)
 
     # If not, add the user to the table
     if len(res) == 0:
