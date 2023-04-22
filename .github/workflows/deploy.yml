@@ -37,4 +37,4 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y rsync
         rsync -avz -e 'ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' --exclude='.git' --exclude='.github' --exclude='*.tar.gz' . ${{ env.USER }}@${{ env.HOST }}:/home/alechh/app/personal-drive-bot
-        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ env.USER }}@${{ env.HOST }} "cd /home/alechh/app/personal-drive-bot && echo -e \"token=${{ env.BOT_TOKEN }}\ndb_name='postgres'\ndb_user='alechh'\ndb_pass='123'\" > .env && sudo docker-compose down && sudo docker-compose up -d"
+        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ env.USER }}@${{ env.HOST }} "cd /home/alechh/app/personal-drive-bot && echo -e \"token='${{ env.BOT_TOKEN }}'\ndb_name='postgres'\ndb_user='alechh'\ndb_pass='123'\" > .env && sudo docker-compose down && sudo docker-compose up -d"
